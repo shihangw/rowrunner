@@ -25,7 +25,11 @@
           aria-label="An orange flying courier traveling along a procedurally generated road"
         ></canvas>
         <div class="hud" aria-label="Live progress HUD">
-          <div id="world-name" class="world-name" aria-label="Current world"></div>
+          <div
+            id="world-name"
+            class="world-name"
+            aria-label="Current world"
+          ></div>
           <section class="hud-speed" aria-label="Speedometer">
             <div class="hud-heading">
               <span>SPEED</span><span id="state-badge">Warming up</span>
@@ -33,24 +37,33 @@
             <div class="speed-dial">
               <svg class="gauge" viewBox="0 0 200 125" aria-hidden="true">
                 <path class="gauge-track" d="M 16 102 A 84 84 0 0 1 184 102" />
-                <path id="gauge-fill" d="M 16 102 A 84 84 0 0 1 184 102" pathLength="100" />
+                <path
+                  id="gauge-fill"
+                  d="M 16 102 A 84 84 0 0 1 184 102"
+                  pathLength="100"
+                />
                 <path class="gauge-inner" d="M 27 102 A 73 73 0 0 1 173 102" />
                 <line id="needle" x1="17" y1="102" x2="26" y2="102" />
                 <text x="15" y="120">0</text>
-                <text id="gauge-scale" x="185" y="120" text-anchor="end">2k</text>
+                <text id="gauge-scale" x="185" y="120" text-anchor="end">
+                  2k
+                </text>
               </svg>
               <div class="speed-value">
-                <strong id="speed">—</strong><span id="rate-unit">rows / sec</span>
+                <strong id="speed">—</strong
+                ><span id="rate-unit">rows / sec</span>
               </div>
             </div>
             <span id="rate-note" class="sr-only">Waiting for two samples</span>
           </section>
           <section class="hud-progress" aria-label="Cumulative progress">
             <div class="hud-heading">
-              <span id="progress-heading">COMPLETED</span><span id="percent">0%</span>
+              <span id="progress-heading">COMPLETED</span
+              ><span id="percent">0%</span>
             </div>
             <div class="count-line">
-              <strong id="completed">0</strong><span id="target">/ 250,000 rows</span>
+              <strong id="completed">0</strong
+              ><span id="target">/ 250,000 rows</span>
             </div>
             <div class="chart-wrap">
               <span id="chart-max">—</span
@@ -68,7 +81,9 @@
               </svg>
               <span id="chart-min">—</span>
             </div>
-            <div class="chart-axis"><span id="chart-duration">−0:00</span><span>now</span></div>
+            <div class="chart-axis">
+              <span id="chart-duration">−0:00</span><span>now</span>
+            </div>
             <div
               class="progress-track"
               role="progressbar"
@@ -79,7 +94,8 @@
               <div id="progress-fill"></div>
             </div>
             <div class="hud-footer">
-              <span id="freshness">Awaiting data</span><span id="eta">ETA —</span>
+              <span id="freshness">Awaiting data</span
+              ><span id="eta">ETA —</span>
             </div>
           </section>
         </div>
@@ -125,19 +141,24 @@
                 <option value="none">Always lit</option>
               </select>
             </div>
-            <button id="auto-biomes" aria-pressed="true">Auto journey on</button>
+            <button id="auto-biomes" aria-pressed="true">
+              Auto journey on
+            </button>
           </div>
         </section>
       </details>
       <section class="controls" id="demo-controls">
         <div class="presets" role="group" aria-label="Demo throughput">
           <button data-rate="80">Cruise <span>80/s</span></button
-          ><button data-rate="500" class="selected">Flow <span>500/s</span></button
+          ><button data-rate="500" class="selected">
+            Flow <span>500/s</span></button
           ><button data-rate="1800">Boost <span>1,800/s</span></button>
         </div>
         <div class="edge-controls">
-          <button id="pause">Pause</button><button id="signal">Lose signal</button
-          ><button id="reset">Reset counter</button><button id="finish">Finish ↗</button>
+          <button id="pause">Pause</button
+          ><button id="signal">Lose signal</button
+          ><button id="reset">Reset counter</button
+          ><button id="finish">Finish ↗</button>
         </div>
       </section>
       <section class="live-controls" id="live-controls" hidden>
@@ -149,7 +170,8 @@
           </select>
         </div>
         <form id="connect-form">
-          <span id="connection" class="hint">LOCAL DEMO</span><label for="run-id">RUN ID</label>
+          <span id="connection" class="hint">LOCAL DEMO</span
+          ><label for="run-id">RUN ID</label>
           <div>
             <input
               id="run-id"
@@ -163,7 +185,10 @@
         <div id="sink-instructions">
           <p class="eyebrow">SEND PROGRESS TO YOUR LOCAL SINK</p>
           <code id="endpoint">POST /api/runs/migration/progress</code>
-          <p class="hint">Send cumulative counts and measurement timestamps. Target is optional.</p>
+          <p class="hint">
+            Send cumulative counts and measurement timestamps. Target is
+            optional.
+          </p>
         </div>
       </section>
       <section class="live-controls" id="solana-controls" hidden>
@@ -174,8 +199,8 @@
         <div>
           <p>Finalized network transactions · refreshes every 2 seconds.</p>
           <p class="hint">
-            Speed appears after two samples. Counts are observed totals; timestamps mark when they
-            were fetched.
+            Speed appears after two samples. Counts are observed totals;
+            timestamps mark when they were fetched.
           </p>
         </div>
       </section>
@@ -191,12 +216,14 @@
           <div>
             <p>Send at least two samples to establish a pace.</p>
             <p>
-              Use the time the count was measured. Omit <code>targetTotal</code> for an open-ended
-              run. Add <code>status: "paused"</code>, <code>"completed"</code>, or
+              Use the time the count was measured. Omit
+              <code>targetTotal</code> for an open-ended run. Add
+              <code>status: "paused"</code>, <code>"completed"</code>, or
               <code>"failed"</code> when known.
             </p>
             <p>
-              The dashboard shows confirmed counts. Only movement and the speedometer are smoothed.
+              The dashboard shows confirmed counts. Only movement and the
+              speedometer are smoothed.
             </p>
           </div>
         </div>
@@ -205,7 +232,10 @@
         <span>ROWRUNNER</span
         ><span
           >SCENERY:
-          <a href="https://kenney.nl/assets/space-kit" target="_blank" rel="noreferrer"
+          <a
+            href="https://kenney.nl/assets/space-kit"
+            target="_blank"
+            rel="noreferrer"
             >KENNEY / CC0</a
           ></span
         >

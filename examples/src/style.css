@@ -334,7 +334,11 @@ header {
   transition: width 0.4s;
 }
 .progress-track.indeterminate #progress-fill {
-  background: repeating-linear-gradient(90deg, #76aba2 0 5px, transparent 5px 10px);
+  background: repeating-linear-gradient(
+    90deg,
+    #76aba2 0 5px,
+    transparent 5px 10px
+  );
 }
 .hud-footer {
   display: flex;
@@ -420,7 +424,12 @@ body[data-state='failed'] #state-badge {
     serif;
 }
 .icon-midnight {
-  background: repeating-linear-gradient(90deg, #14363e 0 4px, #357e83 4px 5px, #151e2f 5px 9px);
+  background: repeating-linear-gradient(
+    90deg,
+    #14363e 0 4px,
+    #357e83 4px 5px,
+    #151e2f 5px 9px
+  );
 }
 .icon-clouds {
   background:
@@ -804,13 +813,29 @@ footer a {
 .icon-sea-storm {
   background:
     linear-gradient(150deg, transparent 45%, #c6e1ed 46% 50%, transparent 51%),
-    repeating-linear-gradient(170deg, #152632 0 8px, #3d7186 8px 11px, #1f455a 11px 16px);
+    repeating-linear-gradient(
+      170deg,
+      #152632 0 8px,
+      #3d7186 8px 11px,
+      #1f455a 11px 16px
+    );
 }
 
 .icon-black-holes {
   background:
-    radial-gradient(circle at 28% 42%, #02020b 0 16%, #ffbe63 18% 23%, transparent 28%),
-    radial-gradient(circle at 74% 65%, #02020b 0 15%, #7ebaff 17% 22%, transparent 27%), #100d23;
+    radial-gradient(
+      circle at 28% 42%,
+      #02020b 0 16%,
+      #ffbe63 18% 23%,
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 74% 65%,
+      #02020b 0 15%,
+      #7ebaff 17% 22%,
+      transparent 27%
+    ),
+    #100d23;
 }
 
 .world-name {

@@ -6,28 +6,28 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/ProgressSink.d.ts",
-      "import": "./dist/ProgressSink.js"
+      "types": "./dist/progress_sink.d.ts",
+      "import": "./dist/progress_sink.js"
     },
     "./scene": {
-      "types": "./dist/RoadScene.d.ts",
-      "import": "./dist/RoadScene.js"
+      "types": "./dist/road_scene.d.ts",
+      "import": "./dist/road_scene.js"
     },
     "./server": {
-      "types": "./dist/ProgressHTTPServer.d.ts",
-      "import": "./dist/ProgressHTTPServer.js"
+      "types": "./dist/progress_http_server.d.ts",
+      "import": "./dist/progress_http_server.js"
     },
     "./plugins": {
       "types": "./dist/plugins/index.d.ts",
       "import": "./dist/plugins/index.js"
     },
     "./geometry": {
-      "types": "./dist/RoadGeometry.d.ts",
-      "import": "./dist/RoadGeometry.js"
+      "types": "./dist/road_geometry.d.ts",
+      "import": "./dist/road_geometry.js"
     },
     "./schemas": {
-      "types": "./dist/PublicSchemas.d.ts",
-      "import": "./dist/PublicSchemas.js"
+      "types": "./dist/public_schemas.d.ts",
+      "import": "./dist/public_schemas.js"
     }
   },
   "files": [
@@ -41,16 +41,19 @@
     "start": "npm run dev --workspace examples",
     "demo": "npm start",
     "test": "npm run build && npm run test:types && node --import tsx --test",
-    "prepack": "npm test",
+    "prepack": "npm run lint && npm test",
     "typecheck": "npm run typecheck --workspace examples && npm run test:types",
     "build:example": "npm run build --workspace examples",
     "build": "tsc -p tsconfig.json",
     "test:types": "tsc --noEmit -p type-tests/tsconfig.json",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix --max-warnings=0",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.13.0"
   },
   "keywords": [
     "progress",
@@ -68,10 +71,15 @@
     "examples"
   ],
   "devDependencies": {
+    "@eslint/js": "10.0.1",
     "@types/node": "^26.6.2",
+    "eslint": "10.11.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.12.0",
     "prettier": "3.9.9",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.1"
   },
   "repository": {
     "type": "git",

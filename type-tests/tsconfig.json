@@ -9,5 +9,5 @@
     "types": ["node"],
     "skipLibCheck": true
   },
-  "include": ["PublicAPIContracts.ts"]
+  "include": ["public_api_contracts.ts"]
 }

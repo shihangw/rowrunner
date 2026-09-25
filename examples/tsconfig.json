@@ -12,5 +12,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["src", "ExampleHTTPServer.ts", "ExampleProgressProducer.ts"]
+  "include": ["src", "example_http_server.ts", "example_progress_producer.ts"]
 }

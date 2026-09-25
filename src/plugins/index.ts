@@ -1,5 +1,5 @@
-export { defineWorld, defineRunner } from './PluginDefinitions.js';
-export { disposeObject3D } from './Object3DResourceDisposal.js';
+export {defineWorld, defineRunner} from './plugin_definitions.js';
+export {disposeObject3D} from './object_3d_resource_disposal.js';
 export type {
   WorldPlugin,
   RunnerPlugin,
@@ -9,11 +9,11 @@ export type {
   SceneFrame,
   GeometryBuilder,
   DrawFunction,
-} from '../SceneTypes.js';
+} from '../scene_types.js';
 
 export {
   SceneDefinitionSchema,
   ProtagonistDefinitionSchema,
   WorldPluginSchema,
   RunnerPluginSchema,
-} from '../SceneConfigurationSchemas.js';
+} from '../scene_configuration_schemas.js';
