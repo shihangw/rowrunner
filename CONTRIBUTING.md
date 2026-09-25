@@ -90,13 +90,14 @@ feature PRs do not edit version numbers.
 Run **Deploy Canary** in the private deployment repository with the candidate
 tag you want to test. QA the [private Cloud Run canary](docs/cloud_run_canary.md).
 After QA, merge the Release Please version pull request; this creates the npm
-version tag and GitHub release. Then open **Actions → Ship → Run workflow** here
-from `main`. Enter the new release tag, for example `v0.1.1`, and the candidate
-tag you tested as `tested_tag`.
+version tag and GitHub release. Run **Promote Canary** in the private deployment
+repository with that release tag, the candidate tag you tested, and the
+successful Deploy Canary run ID from its URL. Promote verifies the canary run
+and triggers public **Ship** with those tags.
 Ship rejects a release with non-release changes beyond the tested candidate;
 version and changelog files may differ. If other changes landed in the meantime,
 run **Deploy Canary** again with the release tag, QA it, and use that same release
-tag as `tested_tag`.
+tag as `tested_tag` in Promote.
 The public workflow checks the tagged source, packs the library, and deploys
 the [public static example](https://shihangw.github.io/rowrunner/). It starts
 on live Solana totals and calls a browser-accessible RPC directly.
