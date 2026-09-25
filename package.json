@@ -1,0 +1,84 @@
+{
+  "name": "rowrunner",
+  "version": "0.1.0",
+  "description": "Turn cumulative progress into smooth live speed estimates, procedural 3D scenes, and animated mascots.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/ProgressSink.d.ts",
+      "import": "./dist/ProgressSink.js"
+    },
+    "./scene": {
+      "types": "./dist/RoadScene.d.ts",
+      "import": "./dist/RoadScene.js"
+    },
+    "./server": {
+      "types": "./dist/ProgressHTTPServer.d.ts",
+      "import": "./dist/ProgressHTTPServer.js"
+    },
+    "./plugins": {
+      "types": "./dist/plugins/index.d.ts",
+      "import": "./dist/plugins/index.js"
+    },
+    "./geometry": {
+      "types": "./dist/RoadGeometry.d.ts",
+      "import": "./dist/RoadGeometry.js"
+    },
+    "./schemas": {
+      "types": "./dist/PublicSchemas.d.ts",
+      "import": "./dist/PublicSchemas.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "start": "npm run dev --workspace examples",
+    "demo": "npm start",
+    "test": "npm run build && npm run test:types && node --import tsx --test",
+    "prepack": "npm test",
+    "typecheck": "npm run typecheck --workspace examples && npm run test:types",
+    "build:example": "npm run build --workspace examples",
+    "build": "tsc -p tsconfig.json",
+    "test:types": "tsc --noEmit -p type-tests/tsconfig.json",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "progress",
+    "throughput",
+    "speedometer",
+    "animation",
+    "webgl"
+  ],
+  "dependencies": {
+    "@types/three": "^0.186.0",
+    "three": "^0.186.0",
+    "zod": "4.6.5"
+  },
+  "workspaces": [
+    "examples"
+  ],
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "prettier": "3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shihangw/rowrunner.git"
+  },
+  "homepage": "https://github.com/shihangw/rowrunner#readme",
+  "bugs": {
+    "url": "https://github.com/shihangw/rowrunner/issues"
+  }
+}

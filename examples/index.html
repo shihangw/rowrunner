@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0c1018" />
+    <title>Rowrunner — Make progress move</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <a class="brand" href="/" aria-label="Rowrunner home"
+          ><span class="brand-mark">↗</span> ROWRUNNER</a
+        >
+        <div class="source-picker" role="group" aria-label="Data source">
+          <button id="demo-mode" class="selected">Demo drive</button
+          ><button id="live-mode">Live input</button>
+        </div>
+      </header>
+      <h1 class="sr-only">Live progress</h1>
+      <section class="viewport" aria-label="Live 3D progress visualization">
+        <canvas
+          id="road"
+          aria-label="An orange flying courier traveling along a procedurally generated road"
+        ></canvas>
+        <div class="hud" aria-label="Live progress HUD">
+          <div id="world-name" class="world-name" aria-label="Current world"></div>
+          <section class="hud-speed" aria-label="Speedometer">
+            <div class="hud-heading">
+              <span>SPEED</span><span id="state-badge">Warming up</span>
+            </div>
+            <div class="speed-dial">
+              <svg class="gauge" viewBox="0 0 200 125" aria-hidden="true">
+                <path class="gauge-track" d="M 16 102 A 84 84 0 0 1 184 102" />
+                <path id="gauge-fill" d="M 16 102 A 84 84 0 0 1 184 102" pathLength="100" />
+                <path class="gauge-inner" d="M 27 102 A 73 73 0 0 1 173 102" />
+                <line id="needle" x1="17" y1="102" x2="26" y2="102" />
+                <text x="15" y="120">0</text>
+                <text id="gauge-scale" x="185" y="120" text-anchor="end">2k</text>
+              </svg>
+              <div class="speed-value">
+                <strong id="speed">—</strong><span id="rate-unit">rows / sec</span>
+              </div>
+            </div>
+            <span id="rate-note" class="sr-only">Waiting for two samples</span>
+          </section>
+          <section class="hud-progress" aria-label="Cumulative progress">
+            <div class="hud-heading">
+              <span id="progress-heading">COMPLETED</span><span id="percent">0%</span>
+            </div>
+            <div class="count-line">
+              <strong id="completed">0</strong><span id="target">/ 250,000 rows</span>
+            </div>
+            <div class="chart-wrap">
+              <span id="chart-max">—</span
+              ><svg
+                id="trend"
+                viewBox="0 0 300 72"
+                preserveAspectRatio="none"
+                role="img"
+                aria-label="Cumulative confirmed progress"
+              >
+                <path class="chart-grid" d="M0 4H300 M0 36H300 M0 68H300" />
+                <path id="trend-area" />
+                <path id="trend-line" />
+                <circle id="trend-dot" r="2.5" hidden />
+              </svg>
+              <span id="chart-min">—</span>
+            </div>
+            <div class="chart-axis"><span id="chart-duration">−0:00</span><span>now</span></div>
+            <div
+              class="progress-track"
+              role="progressbar"
+              aria-label="Confirmed progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <div id="progress-fill"></div>
+            </div>
+            <div class="hud-footer">
+              <span id="freshness">Awaiting data</span><span id="eta">ETA —</span>
+            </div>
+          </section>
+        </div>
+        <p id="scene-error" hidden></p>
+      </section>
+      <details class="customize">
+        <summary>Customize <span>World · protagonist · camera</span></summary>
+        <section class="world-controls" aria-label="Customize your journey">
+          <div class="biome-selection">
+            <p class="eyebrow">WORLD</p>
+            <div
+              id="scene-presets"
+              class="preset-options"
+              role="group"
+              aria-label="Scene presets"
+            ></div>
+          </div>
+          <div>
+            <p class="eyebrow">PROTAGONIST</p>
+            <div
+              id="mascot-presets"
+              class="preset-options"
+              role="group"
+              aria-label="Mascot presets"
+            ></div>
+          </div>
+          <div class="journey-controls">
+            <div>
+              <label class="eyebrow" for="camera-mode">CAMERA</label
+              ><select id="camera-mode">
+                <option value="cinematic">Cinematic · auto</option>
+                <option value="chase">Chase</option>
+                <option value="approach">Approach · front view</option>
+                <option value="side">Side tracking</option>
+                <option value="aerial">Elevated chase</option>
+                <option value="stationary">Stationary · pass-by</option>
+              </select>
+            </div>
+            <div>
+              <label class="eyebrow" for="road-effect">ROAD</label
+              ><select id="road-effect">
+                <option value="renewal">Revamp · light up</option>
+                <option value="none">Always lit</option>
+              </select>
+            </div>
+            <button id="auto-biomes" aria-pressed="true">Auto journey on</button>
+          </div>
+        </section>
+      </details>
+      <section class="controls" id="demo-controls">
+        <div class="presets" role="group" aria-label="Demo throughput">
+          <button data-rate="80">Cruise <span>80/s</span></button
+          ><button data-rate="500" class="selected">Flow <span>500/s</span></button
+          ><button data-rate="1800">Boost <span>1,800/s</span></button>
+        </div>
+        <div class="edge-controls">
+          <button id="pause">Pause</button><button id="signal">Lose signal</button
+          ><button id="reset">Reset counter</button><button id="finish">Finish ↗</button>
+        </div>
+      </section>
+      <section class="live-controls" id="live-controls" hidden>
+        <div class="live-source-picker">
+          <label class="eyebrow" for="live-source">SOURCE</label>
+          <select id="live-source">
+            <option value="solana">Solana transactions · every 2s</option>
+            <option value="custom">Custom progress · HTTP/SSE</option>
+          </select>
+        </div>
+        <form id="connect-form">
+          <span id="connection" class="hint">LOCAL DEMO</span><label for="run-id">RUN ID</label>
+          <div>
+            <input
+              id="run-id"
+              value="migration"
+              pattern="[a-zA-Z0-9_\-]{1,80}"
+              maxlength="80"
+              required
+            /><button type="submit">Connect ↗</button>
+          </div>
+        </form>
+        <div id="sink-instructions">
+          <p class="eyebrow">SEND PROGRESS TO YOUR LOCAL SINK</p>
+          <code id="endpoint">POST /api/runs/migration/progress</code>
+          <p class="hint">Send cumulative counts and measurement timestamps. Target is optional.</p>
+        </div>
+      </section>
+      <section class="live-controls" id="solana-controls" hidden>
+        <div>
+          <p class="eyebrow">SOLANA MAINNET</p>
+          <p id="solana-connection" class="hint" role="status">Connecting…</p>
+        </div>
+        <div>
+          <p>Finalized network transactions · refreshes every 2 seconds.</p>
+          <p class="hint">
+            Speed appears after two samples. Counts are observed totals; timestamps mark when they
+            were fetched.
+          </p>
+        </div>
+      </section>
+      <details class="input-panel">
+        <summary><span>Input format</span><span>+</span></summary>
+        <div class="contract">
+          <pre>
+{
+  "completed": 12500,
+  "targetTotal": 250000,
+  "timestamp": "2026-09-23T18:00:00Z"
+}</pre>
+          <div>
+            <p>Send at least two samples to establish a pace.</p>
+            <p>
+              Use the time the count was measured. Omit <code>targetTotal</code> for an open-ended
+              run. Add <code>status: "paused"</code>, <code>"completed"</code>, or
+              <code>"failed"</code> when known.
+            </p>
+            <p>
+              The dashboard shows confirmed counts. Only movement and the speedometer are smoothed.
+            </p>
+          </div>
+        </div>
+      </details>
+      <footer>
+        <span>ROWRUNNER</span
+        ><span
+          >SCENERY:
+          <a href="https://kenney.nl/assets/space-kit" target="_blank" rel="noreferrer"
+            >KENNEY / CC0</a
+          ></span
+        >
+      </footer>
+      <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
