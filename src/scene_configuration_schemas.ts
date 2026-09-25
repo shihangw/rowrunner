@@ -18,6 +18,7 @@ export const CameraModeSchema = z.enum([
 ]);
 export const RoadEffectSchema = z.enum(['none', 'renewal']);
 export const SpeedScaleSchema = z.enum(['logarithmic', 'linear']);
+export const VisualRateMultiplierSchema = z.number().finite().positive();
 export const Vec3Schema = z
   .tuple([z.number(), z.number(), z.number()])
   .readonly();
@@ -179,4 +180,5 @@ export const SceneOptionsSchema = z.object({
   worldSwitchIntervalSeconds: z.number().finite().positive().optional(),
   roadEffect: RoadEffectSchema.optional(),
   speedScale: SpeedScaleSchema.optional(),
+  visualRateMultiplier: VisualRateMultiplierSchema.optional(),
 });

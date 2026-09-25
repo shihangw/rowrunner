@@ -141,6 +141,16 @@
                 <option value="none">Always lit</option>
               </select>
             </div>
+            <div>
+              <label class="eyebrow" for="visual-rate-multiplier"
+                >VISUAL RATE</label
+              ><select id="visual-rate-multiplier">
+                <option value="1">1×</option>
+                <option value="2">2×</option>
+                <option value="5">5×</option>
+                <option value="12.5">12.5×</option>
+              </select>
+            </div>
             <button id="auto-biomes" aria-pressed="true">
               Auto journey on
             </button>
@@ -149,7 +159,8 @@
       </details>
       <section class="controls" id="demo-controls">
         <div class="presets" role="group" aria-label="Demo throughput">
-          <button data-rate="80">Cruise <span>80/s</span></button
+          <button data-rate="8">Slow stream <span>8/s</span></button
+          ><button data-rate="80">Cruise <span>80/s</span></button
           ><button data-rate="500" class="selected">
             Flow <span>500/s</span></button
           ><button data-rate="1800">Boost <span>1,800/s</span></button>

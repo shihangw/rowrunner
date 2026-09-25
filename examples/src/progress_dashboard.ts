@@ -148,6 +148,13 @@ export function startDashboard(
         elementWithID<HTMLSelectElement>('road-effect').value,
       ),
     );
+  elementWithID<HTMLSelectElement>('visual-rate-multiplier').value = String(
+    roadScene?.visualRateMultiplier ?? sceneOptions.visualRateMultiplier ?? 1,
+  );
+  elementWithID<HTMLSelectElement>('visual-rate-multiplier').onchange = () =>
+    roadScene?.setVisualRateMultiplier(
+      Number(elementWithID<HTMLSelectElement>('visual-rate-multiplier').value),
+    );
   elementWithID<HTMLSelectElement>('camera-mode').onchange = () =>
     roadScene?.setCamera(
       CameraModeSchema.parse(
