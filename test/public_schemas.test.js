@@ -8,9 +8,9 @@ import {
   SinkOptionsSchema,
   SceneOptionsSchema,
   WorldPluginSchema,
-} from 'rowrunner/schemas';
-import {ProgressSink} from 'rowrunner';
-import {defineWorld, defineRunner} from 'rowrunner/plugins';
+} from '@shihangw/rowrunner/schemas';
+import {ProgressSink} from '@shihangw/rowrunner';
+import {defineWorld, defineRunner} from '@shihangw/rowrunner/plugins';
 import {
   sceneCatalog,
   protagonistCatalog,

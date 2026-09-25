@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {ProgressSampleSchema, type ProgressSample} from 'rowrunner';
+import {ProgressSampleSchema, type ProgressSample} from '@shihangw/rowrunner';
 
 const TransactionCountResponseSchema = z.object({
   jsonrpc: z.literal('2.0'),

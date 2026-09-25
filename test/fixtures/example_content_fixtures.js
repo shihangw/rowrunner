@@ -1,4 +1,4 @@
-import {RoadScene as CoreScene} from 'rowrunner/scene';
+import {RoadScene as CoreScene} from '@shihangw/rowrunner/scene';
 import {
   sceneCatalog as resolveWorlds,
   protagonistCatalog as resolveRunners,
@@ -17,10 +17,10 @@ export class RoadScene extends CoreScene {
     super(canvas, {plugins: content, ...options});
   }
 }
-export {CAMERA_MODES} from 'rowrunner/scene';
+export {CAMERA_MODES} from '@shihangw/rowrunner/scene';
 export const SCENE_PRESETS = EXAMPLE_WORLDS;
 export const MASCOT_PRESETS = EXAMPLE_RUNNERS;
-export {CompletionCelebration} from 'rowrunner/scene';
+export {CompletionCelebration} from '@shihangw/rowrunner/scene';
 
 export const PALETTES = Object.fromEntries(
   EXAMPLE_WORLDS.map((w) => [w.id, w.palette]),

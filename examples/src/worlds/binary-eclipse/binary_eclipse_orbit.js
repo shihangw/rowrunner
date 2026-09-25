@@ -1,4 +1,4 @@
-import {drawRoad} from 'rowrunner/geometry';
+import {drawRoad} from '@shihangw/rowrunner/geometry';
 
 // One astronomical coordinate system for the binary and its surrounding road.
 export const BINARY_CENTER = Object.freeze([0, 31000, 0]);
@@ -18,7 +18,7 @@ export function binaryCenters() {
 }
 
 /** Absolute world position: every local coordinate uses the same spatial scale. */
-/** @returns {import('rowrunner/scene').Vec3} */
+/** @returns {import('@shihangw/rowrunner/scene').Vec3} */
 export function orbitPoint([x, y, z], distance) {
   const angle =
     (((distance + z) % LOCAL_ORBIT_LENGTH) * ORBIT_TRAVEL_SCALE) / ORBIT_RADIUS;
@@ -34,7 +34,7 @@ export function orbitPoint([x, y, z], distance) {
 export function createBinaryOrbit(distance, entryDistance = 0) {
   const origin = orbitPoint([0, 0, 0], distance - entryDistance);
   const worldPoint = (point) => orbitPoint(point, distance - entryDistance);
-  /** @type {(point: import('rowrunner/scene').Vec3) => import('rowrunner/scene').Vec3} */
+  /** @type {(point: import('@shihangw/rowrunner/scene').Vec3) => import('@shihangw/rowrunner/scene').Vec3} */
   const localPoint = (point) => {
     const p = worldPoint(point);
     return [

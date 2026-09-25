@@ -1,4 +1,4 @@
-import type {PushResult} from 'rowrunner';
+import type {PushResult} from '@shihangw/rowrunner';
 // Chart confirmed source samples, independently of the smoothed speedometer.
 export class ProgressHistory {
   points: {at: number; completed: number}[] = [];

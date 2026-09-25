@@ -2,11 +2,10 @@
 
 [Back to Rowrunner](../README.md) · [Worlds and runners](scenes.md)
 
-The package name is `rowrunner`. It has not been published yet; install the
-local tarball with `npm install ./rowrunner-0.1.0.tgz` after running `npm pack`:
+Install the package with `npm install @shihangw/rowrunner`:
 
 ```js
-import {ProgressSink, RateSmoother} from 'rowrunner';
+import {ProgressSink, RateSmoother} from '@shihangw/rowrunner';
 
 const sink = new ProgressSink({
   windowMs: 20_000,
@@ -34,12 +33,15 @@ Use `RateSmoother` only for presentation. Do not integrate it to invent progress
 ### Zod schemas and inferred types
 
 Public data types are inferred from Zod schemas, which also validate input to the
-sink and world/runner definitions. Import schemas from `rowrunner/schemas`, or
-from the corresponding `rowrunner`, `rowrunner/scene`, and `rowrunner/plugins` entrypoints.
+sink and world/runner definitions. Import schemas from `@shihangw/rowrunner/schemas`, or
+from the corresponding `@shihangw/rowrunner`, `@shihangw/rowrunner/scene`, and `@shihangw/rowrunner/plugins` entrypoints.
 
 ```ts
 import {z} from 'zod';
-import {ProgressSampleSchema, SceneOptionsSchema} from 'rowrunner/schemas';
+import {
+  ProgressSampleSchema,
+  SceneOptionsSchema,
+} from '@shihangw/rowrunner/schemas';
 
 type SampleInput = z.input<typeof ProgressSampleSchema>; // number or ISO timestamp
 type ParsedSample = z.output<typeof ProgressSampleSchema>; // timestamp is a number
@@ -134,7 +136,7 @@ not a completion promise. It is `null` without a known target and usable rate.
 ## Node HTTP sink
 
 ```js
-import {createProgressServer} from 'rowrunner/server';
+import {createProgressServer} from '@shihangw/rowrunner/server';
 
 const server = createProgressServer();
 server.listen(3000, '127.0.0.1');

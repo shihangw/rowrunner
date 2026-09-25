@@ -1,4 +1,4 @@
-import type {SceneOptions} from 'rowrunner/scene';
+import type {SceneOptions} from '@shihangw/rowrunner/scene';
 import {worlds} from './worlds/example_worlds.ts';
 import {runners} from './runners/example_runners.ts';
 export {worlds, runners};

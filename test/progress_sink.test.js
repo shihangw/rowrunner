@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {ProgressSink, RateSmoother} from 'rowrunner';
+import {ProgressSink, RateSmoother} from '@shihangw/rowrunner';
 
 const base = 1_800_000_000_000;
 const push = (sink, ms, completed, extra = {}) =>

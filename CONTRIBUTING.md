@@ -31,7 +31,7 @@ while the demo is running, run `npm run build` to refresh its compiled modules.
 Keep example worlds and assets outside the core library. Place related content
 in its world's or runner's directory, using `<name>_world.ts`, `<name>_runner.ts`,
 `<name>_geometry.js`, and `<name>_sky_shader.js` where applicable. Public package
-imports such as `rowrunner/scene` remain independent of implementation filenames.
+imports such as `@shihangw/rowrunner/scene` remain independent of implementation filenames.
 
 ## Style and agent instructions
 

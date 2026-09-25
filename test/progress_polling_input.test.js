@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {setImmediate} from 'node:timers/promises';
-import {ProgressSink} from 'rowrunner';
+import {ProgressSink} from '@shihangw/rowrunner';
 import {startProgressPolling} from '../examples/src/inputs/progress_polling_input.ts';
 import {readSolanaTransactionProgress} from '../examples/src/inputs/solana_transaction_source.ts';
 

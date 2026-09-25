@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {defineWorld, defineRunner} from 'rowrunner/plugins';
+import {defineWorld, defineRunner} from '@shihangw/rowrunner/plugins';
 import {bookie} from '../examples/src/runners/bookie/bookie_runner.ts';
 import {ionGlacier as glacier} from '../examples/src/worlds/ion-glacier/ion_glacier_world.ts';
 import {createPluginRegistry} from '../src/plugins/plugin_registry.js';
@@ -208,7 +208,7 @@ test('factory replaces preset geometry and rejects invalid synchronous instances
 test('native Three.js plugins mount, switch, animate and release exclusively owned resources', async () => {
   const {Group, Mesh, BoxGeometry, MeshStandardMaterial, Texture} =
     await import('three');
-  const {disposeObject3D} = await import('rowrunner/plugins');
+  const {disposeObject3D} = await import('@shihangw/rowrunner/plugins');
   const roots = {world: new Group(), runner: new Group()};
   const host = new PluginInstanceHost(roots);
   const object = new Group();

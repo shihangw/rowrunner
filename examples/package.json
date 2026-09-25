@@ -12,7 +12,7 @@
     "pretypecheck": "npm run build --prefix .."
   },
   "dependencies": {
-    "rowrunner": "file:..",
+    "@shihangw/rowrunner": "file:..",
     "three": "^0.186.0",
     "zod": "4.6.5"
   },
