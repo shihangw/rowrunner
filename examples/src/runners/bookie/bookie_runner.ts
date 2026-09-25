@@ -1,4 +1,4 @@
-import {defineRunner} from 'rowrunner/plugins';
+import {defineRunner} from '@shihangw/rowrunner/plugins';
 import {drawBookie} from './bookie_geometry.js';
 
 export const bookie = defineRunner({

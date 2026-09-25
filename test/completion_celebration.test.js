@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CompletionCelebration} from './fixtures/example_content_fixtures.js';
-import {ProgressSink} from 'rowrunner';
+import {ProgressSink} from '@shihangw/rowrunner';
 
 function effect() {
   // State/lifecycle checks independent of a browser or a GPU.

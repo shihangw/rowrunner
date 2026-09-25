@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {once} from 'node:events';
-import {createProgressServer} from 'rowrunner/server';
+import {createProgressServer} from '@shihangw/rowrunner/server';
 
 async function fixture(t) {
   const server = createProgressServer();

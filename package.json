@@ -1,5 +1,5 @@
 {
-  "name": "rowrunner",
+  "name": "@shihangw/rowrunner",
   "version": "0.1.0",
   "description": "Turn cumulative progress into smooth live speed estimates, procedural 3D scenes, and animated mascots.",
   "license": "MIT",
@@ -89,5 +89,9 @@
   "homepage": "https://github.com/shihangw/rowrunner#readme",
   "bugs": {
     "url": "https://github.com/shihangw/rowrunner/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

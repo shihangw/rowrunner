@@ -1,4 +1,4 @@
-import {defineRunner} from 'rowrunner/plugins';
+import {defineRunner} from '@shihangw/rowrunner/plugins';
 import {drawPaperPlane} from './paper_plane_geometry.js';
 
 export const paperPlane = defineRunner({

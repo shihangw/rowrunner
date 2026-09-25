@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {defineRunner, disposeObject3D} from 'rowrunner/plugins';
+import {defineRunner, disposeObject3D} from '@shihangw/rowrunner/plugins';
 
 export const surveyDrone = defineRunner({
   id: 'survey-drone',

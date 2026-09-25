@@ -1,12 +1,27 @@
-import {ProgressSink, RateSmoother, type ProgressSample} from 'rowrunner';
-import {RoadScene, type SceneOptions, type Vec3} from 'rowrunner/scene';
-import {defineWorld, defineRunner, disposeObject3D} from 'rowrunner/plugins';
-import {drawRoad} from 'rowrunner/geometry';
-import {createProgressServer} from 'rowrunner/server';
+import {
+  ProgressSink,
+  RateSmoother,
+  type ProgressSample,
+} from '@shihangw/rowrunner';
+import {
+  RoadScene,
+  type SceneOptions,
+  type Vec3,
+} from '@shihangw/rowrunner/scene';
+import {
+  defineWorld,
+  defineRunner,
+  disposeObject3D,
+} from '@shihangw/rowrunner/plugins';
+import {drawRoad} from '@shihangw/rowrunner/geometry';
+import {createProgressServer} from '@shihangw/rowrunner/server';
 import {Group} from 'three';
 import type {z} from 'zod';
-import type {WorldPluginSchema} from 'rowrunner/schemas';
-import {ProgressSampleSchema, SceneOptionsSchema} from 'rowrunner/schemas';
+import type {WorldPluginSchema} from '@shihangw/rowrunner/schemas';
+import {
+  ProgressSampleSchema,
+  SceneOptionsSchema,
+} from '@shihangw/rowrunner/schemas';
 
 const isoSample: z.input<typeof ProgressSampleSchema> = {
   runId: 'migration',

@@ -1,4 +1,4 @@
-import {defineRunner} from 'rowrunner/plugins';
+import {defineRunner} from '@shihangw/rowrunner/plugins';
 import {drawPrism} from './prism_geometry.js';
 
 export const prism = defineRunner({

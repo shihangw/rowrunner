@@ -1,12 +1,16 @@
-import {ProgressSink, RateSmoother, ProgressSampleSchema} from 'rowrunner';
-import {RoadScene, CompletionCelebration} from 'rowrunner/scene';
+import {
+  ProgressSink,
+  RateSmoother,
+  ProgressSampleSchema,
+} from '@shihangw/rowrunner';
+import {RoadScene, CompletionCelebration} from '@shihangw/rowrunner/scene';
 import {
   worlds as exampleWorlds,
   runners as exampleRunners,
 } from './example_configuration.ts';
-import type {SceneOptions} from 'rowrunner/scene';
-import {CameraModeSchema, RoadEffectSchema} from 'rowrunner/schemas';
-import type {ProgressSample, ProgressSnapshot} from 'rowrunner';
+import type {SceneOptions} from '@shihangw/rowrunner/scene';
+import {CameraModeSchema, RoadEffectSchema} from '@shihangw/rowrunner/schemas';
+import type {ProgressSample, ProgressSnapshot} from '@shihangw/rowrunner';
 import {ProgressHistory} from './progress_history.ts';
 import {startProgressPolling} from './inputs/progress_polling_input.ts';
 

@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {ProgressSampleSchema, type ProgressSample} from 'rowrunner';
+import {ProgressSampleSchema, type ProgressSample} from '@shihangw/rowrunner';
 
 const PollingTimingSchema = z.object({
   intervalMilliseconds: z.number().int().positive().default(2_000),

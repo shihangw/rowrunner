@@ -43,7 +43,7 @@ npm run producer --workspace examples  # Choose Live input → Custom progress i
 
 `build` emits the browser app into `dist/`; the HTTP sink is a separate Node API
 when deploying that static build. `example_http_server.ts` is the local development server.
-`rowrunner: file:..` links the library in this repository. In a separate app,
+`@shihangw/rowrunner: file:..` links the library in this repository. In a separate app,
 replace it with the published Rowrunner version.
 
 ## Files
@@ -69,7 +69,7 @@ Create `src/runners/my-runner/my_runner.ts`:
 
 ```ts
 import {Mesh, SphereGeometry, MeshStandardMaterial} from 'three';
-import {defineRunner, disposeObject3D} from 'rowrunner/plugins';
+import {defineRunner, disposeObject3D} from '@shihangw/rowrunner/plugins';
 
 export const myRunner = defineRunner({
   id: 'my-runner',

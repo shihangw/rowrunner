@@ -1,4 +1,4 @@
-import {defineWorld as define} from 'rowrunner/plugins';
+import {defineWorld as define} from '@shihangw/rowrunner/plugins';
 import {SPACE_MODELS} from '../../assets/space-kit.js';
 import {worldSky} from './sky_shader_utilities.js';
 export function defineWorld({

@@ -1,5 +1,5 @@
-import type {SceneDefinition} from 'rowrunner/scene';
-import type {WorldPlugin} from 'rowrunner/plugins';
+import type {SceneDefinition} from '@shihangw/rowrunner/scene';
+import type {WorldPlugin} from '@shihangw/rowrunner/plugins';
 export function defineWorld(
   definition: Omit<SceneDefinition, 'sky'> & {
     sky?: number;

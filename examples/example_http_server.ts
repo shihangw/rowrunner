@@ -1,7 +1,7 @@
 import {fileURLToPath} from 'node:url';
 import type {RequestListener} from 'node:http';
 import {createServer} from 'vite';
-import {createProgressServer} from 'rowrunner/server';
+import {createProgressServer} from '@shihangw/rowrunner/server';
 import {readSolanaTransactionProgress} from './src/inputs/solana_transaction_source.ts';
 
 // One local Node process serves the TypeScript app and the progress/SSE API.

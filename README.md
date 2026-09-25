@@ -7,7 +7,7 @@ processes 500 rows a second; Bookie flies down a neon road, the speedometer show
 the pace, and the progress chart climbs toward completion. When the job finishes,
 the camera moves in and the confetti keeps going.
 
-[![Bookie flying through Neon Meridian with an integrated speedometer and progress chart](docs/images/neon_meridian_bookie.jpg)](docs/images/neon_meridian_bookie.jpg)
+[![Bookie flying through Neon Meridian with an integrated speedometer and progress chart](https://raw.githubusercontent.com/shihangw/rowrunner/main/docs/images/neon_meridian_bookie.jpg)](https://raw.githubusercontent.com/shihangw/rowrunner/main/docs/images/neon_meridian_bookie.jpg)
 
 ## Why use it?
 
@@ -33,11 +33,11 @@ The example includes **seven worlds** and **four runners**: Bookie, Prism, Paper
 Plane, and Survey Drone. Cinematic cameras rotate through tracking, approaching,
 and passing views, with scheduled fades between worlds.
 
-| Binary Eclipse · Prism                                                                                                                            | Sea Storm · Bookie                                                                                                                                                            |
-| ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Prism traveling around two black holes with amber and blue halos](docs/images/binary_eclipse_prism.jpg)](docs/images/binary_eclipse_prism.jpg) | [![Bookie flying above a stormy sea](docs/images/sea_storm_bookie.jpg)](docs/images/sea_storm_bookie.jpg)                                                                     |
-| **Matrix · Prism**                                                                                                                                | **Job complete · Bookie**                                                                                                                                                     |
-| [![Glowing Prism flying through Matrix's green data towers](docs/images/matrix_prism.jpg)](docs/images/matrix_prism.jpg)                          | [![Bookie celebrating a completed migration with a persistent Congrats message and confetti](docs/images/completion_celebration.jpg)](docs/images/completion_celebration.jpg) |
+| Binary Eclipse · Prism                                                                                                                                                                                                                                                | Sea Storm · Bookie                                                                                                                                                                                                                                                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Prism traveling around two black holes with amber and blue halos](https://raw.githubusercontent.com/shihangw/rowrunner/main/docs/images/binary_eclipse_prism.jpg)](https://raw.githubusercontent.com/shihangw/rowrunner/main/docs/images/binary_eclipse_prism.jpg) | [![Bookie flying above a stormy sea](https://raw.githubusercontent.com/shihangw/rowrunner/main/docs/images/sea_storm_bookie.jpg)](https://raw.githubusercontent.com/shihangw/rowrunner/main/docs/images/sea_storm_bookie.jpg)                                                                     |
+| **Matrix · Prism**                                                                                                                                                                                                                                                    | **Job complete · Bookie**                                                                                                                                                                                                                                                                         |
+| [![Glowing Prism flying through Matrix's green data towers](https://raw.githubusercontent.com/shihangw/rowrunner/main/docs/images/matrix_prism.jpg)](https://raw.githubusercontent.com/shihangw/rowrunner/main/docs/images/matrix_prism.jpg)                          | [![Bookie celebrating a completed migration with a persistent Congrats message and confetti](https://raw.githubusercontent.com/shihangw/rowrunner/main/docs/images/completion_celebration.jpg)](https://raw.githubusercontent.com/shihangw/rowrunner/main/docs/images/completion_celebration.jpg) |
 
 These screenshots were captured from the running demo with simulated migration
 progress. Click an image to view it at full size.
@@ -83,15 +83,19 @@ curl http://127.0.0.1:3000/api/runs/migration/progress \
 Send another count with a newer timestamp to establish the rate, then keep
 reporting while the job runs. Use a new run ID for a new job. For Datadog or another
 metrics source, map the measured cumulative count and timestamp into this format.
-See the [input contract and HTTP API](docs/progress.md#input-contract) for details.
+See the [input contract and HTTP API](https://github.com/shihangw/rowrunner/blob/main/docs/progress.md#input-contract) for details.
 
 ## Use it in your app
 
 Rowrunner is a TypeScript library with Three.js rendering and Zod-validated input.
 You can use its progress estimator independently of the 3D scene:
 
+```sh
+npm install @shihangw/rowrunner
+```
+
 ```ts
-import {ProgressSink} from 'rowrunner';
+import {ProgressSink} from '@shihangw/rowrunner';
 
 const progress = new ProgressSink();
 const now = Date.now();
@@ -102,20 +106,16 @@ progress.push({runId: 'migration', completed: 2000, timestamp: now});
 console.log(progress.snapshot().rate); // 500 rows/second
 ```
 
-The package is not published to npm yet. Run `npm pack` in this repository, then
-install the generated tarball in your app with
-`npm install /path/to/rowrunner-0.1.0.tgz`.
-
-For a visual integration, start with the [TypeScript example](examples/README.md)
-or [define your own world and runner](docs/scenes.md). The example supplies the
+For a visual integration, start with the [TypeScript example](https://github.com/shihangw/rowrunner/blob/main/examples/README.md)
+or [define your own world and runner](https://github.com/shihangw/rowrunner/blob/main/docs/scenes.md). The example supplies the
 HUD and scene content; the core supplies the estimator, renderer, cameras, and
 plugin API.
 
 ## Documentation
 
-- [Example setup and customization](examples/README.md)
-- [Progress inputs, rate estimation, and HTTP/SSE API](docs/progress.md)
-- [Worlds, runners, cameras, and Three.js models](docs/scenes.md)
-- [Contributing and development](CONTRIBUTING.md)
+- [Example setup and customization](https://github.com/shihangw/rowrunner/blob/main/examples/README.md)
+- [Progress inputs, rate estimation, and HTTP/SSE API](https://github.com/shihangw/rowrunner/blob/main/docs/progress.md)
+- [Worlds, runners, cameras, and Three.js models](https://github.com/shihangw/rowrunner/blob/main/docs/scenes.md)
+- [Contributing and development](https://github.com/shihangw/rowrunner/blob/main/CONTRIBUTING.md)
 
-MIT licensed. Example scenery includes [Kenney assets under CC0](examples/THIRD_PARTY.md).
+MIT licensed. Example scenery includes [Kenney assets under CC0](https://github.com/shihangw/rowrunner/blob/main/examples/THIRD_PARTY.md).

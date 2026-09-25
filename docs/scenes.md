@@ -11,7 +11,7 @@ extension API; applications supply their content.
 Define content in your own files and pass it directly:
 
 ```ts
-import {RoadScene} from 'rowrunner/scene';
+import {RoadScene} from '@shihangw/rowrunner/scene';
 import {myWorld} from './worlds/my-world/my_world.js';
 import {myRunner} from './runners/my-runner/my_runner.js';
 
@@ -28,7 +28,7 @@ scene.render(500, 1 / 60);
 scene.dispose();
 ```
 
-`defineWorld()` and `defineRunner()` from `rowrunner/plugins` create typed
+`defineWorld()` and `defineRunner()` from `@shihangw/rowrunner/plugins` create typed
 JavaScript definitions. A definition supplies an ID, optional metadata, and a
 `create()` factory or `draw(geometry, frame)` callback. The term "plugin" describes
 this extension interface; no external installation or global registry is needed.
@@ -50,7 +50,7 @@ Worlds accept partial RGB `palette` overrides, `road: false` to hide the road,
 a `sky` fragment shader with per-frame uniforms, and an optional `path` adapter
 for curved coordinate systems. The default sky is a simple palette gradient.
 Example-specific planets, storms, black holes, and model catalogs are outside
-the library. `rowrunner/geometry` exports road drawing helpers for custom paths.
+the library. `@shihangw/rowrunner/geometry` exports road drawing helpers for custom paths.
 
 Runners accept `forwardAxis`, `scale`, `offset`, `bob`, and `roll`. The renderer
 aligns their authored front with forward travel in every camera. Geometry
@@ -76,7 +76,7 @@ fades out, swaps world and camera together, and fades in. Other camera modes
 fade to the next world when the interval expires. The schedule pauses while
 progress is stopped, completed, or reduced motion is active. Passing views hold
 for at least six seconds. `render(rate, dt, { completed: true })` temporarily
-uses the approaching camera. `CompletionCelebration` from `rowrunner/scene`
+uses the approaching camera. `CompletionCelebration` from `@shihangw/rowrunner/scene`
 provides the persistent configurable heading and looping confetti.
 
 The default logarithmic speed curve makes 80/s feel fast while keeping large
@@ -97,7 +97,7 @@ loop's camera pose and render targets; call `scene.render()` as before.
 
 ```js
 import * as THREE from 'three';
-import {defineRunner, disposeObject3D} from 'rowrunner/plugins';
+import {defineRunner, disposeObject3D} from '@shihangw/rowrunner/plugins';
 
 export const myRunner = defineRunner({
   id: 'crystal',
@@ -144,7 +144,7 @@ the visualization; plugin factories stay synchronous:
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {clone} from 'three/addons/utils/SkeletonUtils.js';
 import {AnimationMixer} from 'three';
-import {defineRunner, disposeObject3D} from 'rowrunner/plugins';
+import {defineRunner, disposeObject3D} from '@shihangw/rowrunner/plugins';
 
 const asset = await new GLTFLoader().loadAsync('/models/runner.glb');
 const modelRunner = defineRunner({
