@@ -72,6 +72,25 @@ This checks package readiness without publishing or requiring npm credentials;
 registry permissions and version availability are checked only during a real release.
 The dry run allows already-published versions, so PRs do not need a version bump.
 
+## Versions and releases
+
+Release Please opens a version pull request after releasable commits reach `main`.
+Use Conventional Commit messages or squash PR titles: `fix:` increments the patch
+version, `feat:` increments the minor version, and `!` with a `BREAKING CHANGE:`
+footer marks a breaking change. Before 1.0, breaking changes increment the minor
+version. Documentation and CI-only `chore:` commits do not open a release PR.
+The version pull request updates `package.json`, `package-lock.json`, the release
+manifest, and the changelog together. Review and merge it when ready; ordinary
+feature PRs do not edit version numbers.
+
+After a version pull request is merged, the release workflow runs the checks on
+that exact commit and publishes it to npm. The npm package owner must first add a
+[trusted publisher](https://docs.npmjs.com/trusted-publishers/) for the existing
+`@shihangw/rowrunner` package: GitHub user `shihangw`, repository `rowrunner`,
+workflow filename `release.yml`, and direct `npm publish` permission. Leave the
+optional environment field empty. This one-time npm setting enables short-lived
+GitHub Actions authentication; no npm token is stored in the repository.
+
 ## Packaging
 
 ```sh

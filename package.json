@@ -87,7 +87,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shihangw/rowrunner.git"
+    "url": "https://github.com/shihangw/rowrunner"
   },
   "homepage": "https://github.com/shihangw/rowrunner#readme",
   "bugs": {
