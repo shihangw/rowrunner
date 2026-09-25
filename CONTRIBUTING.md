@@ -54,11 +54,21 @@ npm run lint:fix      # Apply automatic fixes, then review the diff
 npm run format       # Prettier
 npm run check        # Lint, formatting, types, and tests
 npm run build:example
+npm run check:package # Build, pack, and verify an isolated package installation
 ```
 
 For narrower work, `npm test` builds the library and runs runtime and public-type
 tests; `npm run typecheck` also checks the example. Follow the verification
 scope in [the development guide](agents/development.md). Inspect visual changes in the running demo.
+
+GitHub Actions runs these checks for every pull request and pushes to `main` on
+Node.js 22.13 (the supported minimum) and Node.js 24. CI also builds the example
+and installs the packed library in a temporary consumer project. It checks all
+exported entrypoints, generated declarations, the public type contracts, and a
+progress estimate before a [publish dry run](https://docs.npmjs.com/cli/commands/npm-publish).
+This checks package readiness without publishing or requiring npm credentials;
+registry permissions and version availability are checked only during a real release.
+The dry run allows already-published versions, so PRs do not need a version bump.
 
 ## Packaging
 
