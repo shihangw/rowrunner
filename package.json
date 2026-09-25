@@ -44,13 +44,17 @@
     "prepack": "npm run lint && npm test",
     "typecheck": "npm run typecheck --workspace examples && npm run test:types",
     "build:example": "npm run build --workspace examples",
+    "build:canary": "npm run typecheck --workspace examples && npm exec --workspace examples -- vite build --base=/rowrunner/",
     "build": "tsc -p tsconfig.json",
     "test:types": "tsc --noEmit -p type-tests/tsconfig.json",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "prelint": "npm run build",
     "lint": "eslint . --max-warnings=0",
+    "prelint:fix": "npm run build",
     "lint:fix": "eslint . --fix --max-warnings=0",
-    "check": "npm run lint && npm run format:check && npm run typecheck && npm test"
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test",
+    "check:package": "npm run build && node scripts/check_package.mjs"
   },
   "engines": {
     "node": ">=22.13.0"
@@ -84,7 +88,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shihangw/rowrunner.git"
+    "url": "https://github.com/shihangw/rowrunner"
   },
   "homepage": "https://github.com/shihangw/rowrunner#readme",
   "bugs": {

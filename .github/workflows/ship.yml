@@ -1,0 +1,133 @@
+name: Ship
+run-name: Ship ${{ inputs.tag }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub release tag, for example v0.1.1
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rowrunner-ship
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    name: Build candidate and canary example
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      sha256: ${{ steps.pack.outputs.sha256 }}
+    steps:
+      - name: Validate release tag
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+          test "$(gh release view "$RELEASE_TAG" --json isDraft,isPrerelease --jq '.isDraft or .isPrerelease')" = false
+          echo "version=${RELEASE_TAG#v}" >> "$GITHUB_OUTPUT"
+      - name: Check out released source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify release source and version
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          test "$(node -p 'require("./package.json").version')" = "$RELEASE_VERSION"
+          test "$(node -p 'require("./.release-please-manifest.json")["."]')" = "$RELEASE_VERSION"
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check library and package
+        run: |
+          npm run check
+          npm run check:package
+      - name: Build static canary example
+        env:
+          VITE_STATIC_PREVIEW: 'true'
+        run: npm run build:canary
+      - name: Pack release candidate
+        id: pack
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP" --silent
+          mv "$RUNNER_TEMP/shihangw-rowrunner-$RELEASE_VERSION.tgz" "$RUNNER_TEMP/rowrunner.tgz"
+          echo "sha256=$(sha256sum "$RUNNER_TEMP/rowrunner.tgz" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+      - name: Save exact npm candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: rowrunner-candidate
+          path: ${{ runner.temp }}/rowrunner.tgz
+          if-no-files-found: error
+          retention-days: 14
+      - name: Save static example for GitHub Pages
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: examples/dist
+
+  canary:
+    name: Deploy example to canary
+    needs: candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    outputs:
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages preview
+        id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  publish:
+    name: QA approval and npm latest
+    needs: [candidate, canary]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: npm-release
+      url: ${{ needs.canary.outputs.url }}
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Download approved candidate
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: rowrunner-candidate
+      - name: Verify candidate integrity and version
+        env:
+          EXPECTED_SHA256: ${{ needs.candidate.outputs.sha256 }}
+          EXPECTED_VERSION: ${{ needs.candidate.outputs.version }}
+        run: |
+          echo "$EXPECTED_SHA256  rowrunner.tgz" | sha256sum -c -
+          test "$(tar -xOzf rowrunner.tgz package/package.json | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).version')" = "$EXPECTED_VERSION"
+      - name: Publish approved version as latest
+        run: npm publish rowrunner.tgz --access public --tag latest
