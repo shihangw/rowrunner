@@ -28,7 +28,7 @@ export class ProgressHistory {
     this.version++;
   }
   plot() {
-    if (!this.points.length) {
+    if (this.points.length === 0) {
       return {line: '', area: '', last: null, min: 0, max: 1, duration: 0};
     }
 
@@ -101,7 +101,7 @@ export class ProgressHistory {
     const line = coordinates
       .map(
         ([x, y], index) =>
-          `${index ? 'L' : 'M'}${x.toFixed(2)},${y.toFixed(2)}`,
+          `${index > 0 ? 'L' : 'M'}${x.toFixed(2)},${y.toFixed(2)}`,
       )
       .join(' ');
     const endpoint = coordinates.at(-1)!;

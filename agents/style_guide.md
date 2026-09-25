@@ -30,8 +30,28 @@ records the repository's conventions and deliberate adaptations.
 - Document public behavior, units, ownership, and non-obvious decisions. Comments
   should explain intent rather than repeat the code.
 
-`eslint.config.js` enforces language and correctness rules with ESLint and
-TypeScript ESLint. `.prettierrc.json` controls layout. This is a Google-based
+`eslint.config.js` extends [Google TypeScript Style (`gts`)](https://github.com/google/gts)
+with project-specific rules. Type-aware linting uses each TypeScript project,
+including the library, example, and public API contracts. `.prettierrc.json` controls layout. This is a Google-based
 project style, not a claim of exact compliance with every upstream convention.
 Do not disable rules globally to get a change through. Fix the issue or use a
 narrow suppression with a concrete explanation.
+
+## Explicit conditions
+
+TypeScript enables `@typescript-eslint/strict-boolean-expressions`, with all
+non-boolean allowances disabled. Ordinary booleans can use `if (isRunning)`.
+Choose a check that expresses the intended meaning for other types:
+
+- Presence: `value != null` (excludes both `null` and `undefined`).
+- Optional flags: `isEnabled === true`; use `isEnabled !== true` to include the
+  absent case when testing the opposite.
+- Counts: `count > 0`; collections: `items.length > 0`.
+- Text: `name !== ''`; nullable text: `name != null && name !== ''`.
+
+Do not replace truthiness checks mechanically with null checks: zero, false,
+and empty strings are present values. Handle NaN explicitly where numbers may
+be non-finite. Do not add `Boolean(value)` merely to bypass the rule.
+
+The rule applies to TypeScript. JavaScript geometry helpers and tests use the
+Google base lint rules without type-aware condition checks.

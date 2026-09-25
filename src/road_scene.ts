@@ -45,7 +45,9 @@ export {CompletionCelebration} from './completion_celebration.js';
 const roadCenterOffsetAtDistance = (distance: number) =>
   24 * Math.sin(distance / 240) + 12 * Math.sin(distance / 100);
 const normalizedVector = (vector: readonly number[]): Vec3 => {
-  const vectorLength = Math.hypot(...vector) || 1;
+  const magnitude = Math.hypot(...vector);
+  const vectorLength =
+    magnitude === 0 || Number.isNaN(magnitude) ? 1 : magnitude;
   return [
     vector[0] / vectorLength,
     vector[1] / vectorLength,
@@ -190,7 +192,7 @@ export class RoadScene {
         for (const entry of entries) {
           if (
             typeof entry === 'object' &&
-            entry &&
+            entry != null &&
             'kind' in entry &&
             !installed.includes(entry as WorldPlugin | RunnerPlugin)
           ) {
@@ -204,7 +206,7 @@ export class RoadScene {
       entries?: readonly (string | T)[],
     ) =>
       entries?.map((entry) =>
-        typeof entry === 'object' && entry && 'kind' in entry
+        typeof entry === 'object' && entry != null && 'kind' in entry
           ? entry.id
           : entry,
       );
@@ -310,7 +312,7 @@ export class RoadScene {
     if (mode === 'cinematic' && this.cameraMode !== mode) {
       this.cinematic?.rebase(this.distance);
     }
-    if (mode !== this.cameraMode && this.pathEntry) {
+    if (mode !== this.cameraMode && this.pathEntry != null) {
       this.pathEntry!.introFinished = true;
     }
     this.cameraMode = mode;
@@ -351,10 +353,9 @@ export class RoadScene {
     return this.sceneRenderer.camera;
   }
   private projectPoint(localPoint: Vec3): Vec3 {
-    const runnerTransformedPoint = this.transform
-      ? this.transform(localPoint)
-      : localPoint;
-    return this.worldTransform
+    const runnerTransformedPoint =
+      this.transform != null ? this.transform(localPoint) : localPoint;
+    return this.worldTransform != null
       ? this.worldTransform(runnerTransformedPoint)
       : runnerTransformedPoint;
   }
@@ -663,7 +664,7 @@ export class RoadScene {
         vertices[a],
         vertices[b],
         vertices[c],
-        tint
+        tint != null
           ? (tint.map(
               (v) => v * (0.45 + brightness * 0.55),
             ) as unknown as Color)
@@ -679,7 +680,7 @@ export class RoadScene {
       this.autoBiomes &&
       allowWorldChange &&
       this.scenes.length > 1 &&
-      !this.biomeTransition &&
+      this.biomeTransition == null &&
       (this.cameraMode === 'cinematic'
         ? cinematicWorldChangeRequested
         : this.worldElapsedSeconds >= this.worldSwitchIntervalSeconds)
@@ -696,9 +697,10 @@ export class RoadScene {
       this.scenes.find((p) => p.id === id)!.palette;
     let palette = paletteFor(this.scenePreset);
     let fade = 0;
-    if (this.biomeTransition) {
+    if (this.biomeTransition != null) {
       const {from, to, start} = this.biomeTransition;
-      const duration = this.biomeTransition.synchronizeCamera ? 1.2 : 6;
+      const duration =
+        this.biomeTransition.synchronizeCamera === true ? 1.2 : 6;
       const raw = Math.min(1, Math.max(0, (this.time - start) / duration));
       const mix = raw * raw * (3 - 2 * raw);
       palette = Object.fromEntries(
@@ -778,7 +780,7 @@ export class RoadScene {
         this.cameraTime += frameDeltaSeconds;
       }
       const isFadingOutWorld =
-        this.biomeTransition?.synchronizeCamera &&
+        this.biomeTransition?.synchronizeCamera === true &&
         this.scenePreset === this.biomeTransition.from;
       if (isFadingOutWorld) {
         cinematicDirector?.pass?.advance(
@@ -790,7 +792,7 @@ export class RoadScene {
         );
       }
       if (
-        (!this.pathEntry || this.pathEntry!.introFinished) &&
+        (this.pathEntry == null || this.pathEntry!.introFinished) &&
         !isFadingOutWorld
       ) {
         const shotFinished = cinematicDirector?.advance(
@@ -800,7 +802,7 @@ export class RoadScene {
           visualSpeed,
           false,
         );
-        if (shotFinished) {
+        if (shotFinished === true) {
           const shouldCycleWorld = this.autoBiomes && this.scenes.length > 1;
           cinematicWorldChangeRequested =
             shouldCycleWorld &&
@@ -822,7 +824,7 @@ export class RoadScene {
     const previousWorld = this.scenePreset;
     // Freeze an in-flight fade while paused, completed, or reducing motion.
     if (
-      this.biomeTransition &&
+      this.biomeTransition != null &&
       (completed || processingRate <= 0) &&
       !isMotionReduced
     ) {
@@ -834,7 +836,7 @@ export class RoadScene {
     );
     if (
       previousWorld !== this.scenePreset &&
-      this.biomeTransition?.synchronizeCamera
+      this.biomeTransition?.synchronizeCamera === true
     ) {
       // Swap geometry and camera together at the fully obscured midpoint.
       cinematicDirector?.next(this.distance, visualSpeed);
@@ -867,19 +869,21 @@ export class RoadScene {
       : (cinematicDirector?.pass?.frame ??
         (activeCameraMode === 'stationary' ? this.stationaryPass.frame : null));
     const isStationary = stationaryFrame !== null;
-    const worldOriginDistance = stationaryFrame
-      ? stationaryFrame.worldDistance
-      : this.distance;
+    const worldOriginDistance =
+      stationaryFrame != null ? stationaryFrame.worldDistance : this.distance;
     const roadCenterXAt = hasCurvedPath
       ? () => 0
       : (z: number) =>
           roadCenterOffsetAtDistance(worldOriginDistance + z) -
           roadCenterOffsetAtDistance(worldOriginDistance);
     const canvasBounds = this.canvas.getBoundingClientRect();
-    const pixelRatio = Math.min(devicePixelRatio || 1, 1.75);
+    const pixelRatio = Math.min(
+      devicePixelRatio > 0 ? devicePixelRatio : 1,
+      1.75,
+    );
     const viewportWidth = Math.round(canvasBounds.width * pixelRatio);
     const viewportHeight = Math.round(canvasBounds.height * pixelRatio);
-    if (!viewportWidth || !viewportHeight) {
+    if (viewportWidth === 0 || viewportHeight === 0) {
       return;
     }
     let fieldOfViewRadians =
@@ -904,12 +908,12 @@ export class RoadScene {
     }
     let pose = isPlayingPathIntroduction
       ? cameraPose(0, 'chase')
-      : stationaryFrame
+      : stationaryFrame != null
         ? stationaryPose(stationaryFrame, roadCenterXAt)
-        : cinematicDirector
+        : cinematicDirector != null
           ? cinematicDirector.pose()
           : cameraPose(this.cameraTime, activeCameraMode);
-    if (world.path?.camera) {
+    if (world.path?.camera != null) {
       pose = world.path!.camera(pose, isStationary, completed);
     }
     if (isPlayingPathIntroduction) {
@@ -956,14 +960,14 @@ export class RoadScene {
     const orbit = hasCurvedPath
       ? world.path!.createFrame(worldOriginDistance, this.pathEntry!.distance)
       : null;
-    const eye = orbit ? orbit.localPoint(pose.eye) : pose.eye;
-    const target = orbit ? orbit.localPoint(pose.target) : pose.target;
+    const eye = orbit != null ? orbit.localPoint(pose.eye) : pose.eye;
+    const target = orbit != null ? orbit.localPoint(pose.target) : pose.target;
     const viewMatrix = new Float32Array(createCameraViewMatrix(eye, target));
     const runnerDefinition = this.protagonists.find(
       (p) => p.id === this.protagonist,
     )!;
     const runnerZ = stationaryFrame?.protagonistZ ?? 0;
-    const runnerX = stationaryFrame ? roadCenterXAt(runnerZ) : 0;
+    const runnerX = stationaryFrame != null ? roadCenterXAt(runnerZ) : 0;
     const renewalFrontDistance = this.distance + runnerDefinition.offset[2];
     // Travel is always +Z along the road. Orient each model's authored front
     // along that tangent, independently of which camera happens to observe it.
@@ -994,12 +998,13 @@ export class RoadScene {
           this.roadEffect,
         ).accent,
       projectPoint: orbit?.localPoint ?? ((point: Vec3): Vec3 => [...point]),
-      view: stationaryFrame
-        ? Object.freeze({
-            ...pose,
-            clearance: 24 + stationaryFrame.segmentLength * 0.1,
-          })
-        : null,
+      view:
+        stationaryFrame != null
+          ? Object.freeze({
+              ...pose,
+              clearance: 24 + stationaryFrame.segmentLength * 0.1,
+            })
+          : null,
     });
     this.sceneRenderer.begin(
       viewportWidth,
@@ -1011,13 +1016,14 @@ export class RoadScene {
       isMotionReduced,
       {
         view: viewMatrix,
-        eye: orbit
-          ? orbit.worldPoint(pose.eye)
-          : [
-              eye[0] + roadCenterOffsetAtDistance(worldOriginDistance),
-              eye[1],
-              eye[2] + worldOriginDistance,
-            ],
+        eye:
+          orbit != null
+            ? orbit.worldPoint(pose.eye)
+            : [
+                eye[0] + roadCenterOffsetAtDistance(worldOriginDistance),
+                eye[1],
+                eye[2] + worldOriginDistance,
+              ],
         fov: fieldOfViewRadians,
       },
     );
@@ -1040,7 +1046,7 @@ export class RoadScene {
         far: roadEnd,
         effect: this.roadEffect,
       };
-      if (orbit) {
+      if (orbit != null) {
         this.worldTransform = null;
         drawRoad(
           {

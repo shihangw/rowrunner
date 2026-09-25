@@ -21,7 +21,7 @@ export function startProgressPolling(
   let activeRequest: AbortController | undefined;
 
   async function poll() {
-    if (isStopped || activeRequest) {
+    if (isStopped || activeRequest != null) {
       return;
     }
     const request = new AbortController();

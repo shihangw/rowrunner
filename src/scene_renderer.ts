@@ -61,12 +61,15 @@ class DynamicGeometryMesh extends THREE.Mesh<
     this.frustumCulled = false;
   }
   upload(values: readonly number[]) {
-    if (!values.length) {
+    if (values.length === 0) {
       this.visible = false;
       return;
     }
     this.visible = true;
-    if (!this.vertexBuffer || values.length > this.vertexBuffer.array.length) {
+    if (
+      this.vertexBuffer == null ||
+      values.length > this.vertexBuffer.array.length
+    ) {
       // Reallocate only when capacity grows, releasing the old GPU buffer.
       this.geometry.dispose();
       this.geometry = new THREE.BufferGeometry();
@@ -222,7 +225,7 @@ export class SceneRenderer {
     values: Record<string, unknown>,
   ) {
     for (const [name, value] of Object.entries(values)) {
-      if (material.uniforms[name]) {
+      if (material.uniforms[name] != null) {
         material.uniforms[name].value = value;
       }
     }
@@ -261,7 +264,7 @@ export class SceneRenderer {
     renderer.setClearColor(this.fogColor.fromArray(palette.sky), 1);
     renderer.clear();
     let skyMaterial = this.sky;
-    if (sky) {
+    if (sky != null) {
       if (!this.skyMaterials.has(sky)) {
         this.skyMaterials.set(
           sky,
@@ -295,9 +298,9 @@ export class SceneRenderer {
       skyEye: skyFrame.eye,
       skyLens: Math.tan(skyFrame.fov / 2),
       skyHeight: viewportHeight,
-      skyRight: v ? [v[0], v[4], v[8]] : [1, 0, 0],
-      skyUp: v ? [v[1], v[5], v[9]] : [0, 1, 0],
-      skyForward: v ? [-v[2], -v[6], -v[10]] : [0, 0, 1],
+      skyRight: v != null ? [v[0], v[4], v[8]] : [1, 0, 0],
+      skyUp: v != null ? [v[1], v[5], v[9]] : [0, 1, 0],
+      skyForward: v != null ? [-v[2], -v[6], -v[10]] : [0, 0, 1],
       ...sky?.uniforms?.(skyFrame),
     });
     this.renderFullscreenPass(skyMaterial);
@@ -381,7 +384,7 @@ export class SceneRenderer {
     this.scene.fog.density = 1 / fogDistance;
     renderer.render(this.scene, this.camera);
     renderer.render(this.particleScene, this.camera);
-    if (glassVertices.length) {
+    if (glassVertices.length > 0) {
       renderer.copyFramebufferToTexture(this.backdropTexture);
       const faces = [];
       for (let i = 0; i < glassVertices.length; i += 30) {

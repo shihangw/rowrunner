@@ -84,7 +84,7 @@ export class StationaryCameraPass {
   elapsed: number;
   segmentLength: number | null;
   side!: number;
-  shot!: string;
+  shot = '';
   private remainingShots: string[] = [];
   constructor(distance = 0, random = Math.random) {
     this.random = random;
@@ -98,7 +98,7 @@ export class StationaryCameraPass {
   chooseShot() {
     this.side = this.random() < 0.5 ? -1 : 1;
     // A random deck guarantees variety, with no repeated angle across deck boundaries.
-    if (!this.remainingShots?.length) {
+    if (this.remainingShots.length === 0) {
       this.remainingShots = [...STATIONARY_SHOTS];
     }
     const choices = this.remainingShots.filter((shot) => shot !== this.shot);
@@ -164,7 +164,7 @@ const trackingPose = (id: string): CameraPose =>
 export class CinematicCameraDirector {
   private readonly random: () => number;
   private remaining: string[];
-  shot!: string;
+  shot = '';
   pass: StationaryCameraPass | null = null;
   private from: CameraPose | null = null;
   private elapsed = 0;
@@ -175,8 +175,9 @@ export class CinematicCameraDirector {
   }
   next(distance: number, velocity = 0) {
     const previous = this.shot;
-    const previousPose = previous && !this.pass ? trackingPose(previous) : null;
-    if (!this.remaining.length) {
+    const previousPose =
+      previous !== '' && this.pass == null ? trackingPose(previous) : null;
+    if (this.remaining.length === 0) {
       this.remaining = [...CINEMATIC_SHOTS];
       for (let i = this.remaining.length - 1; i > 0; i--) {
         const j = Math.floor(this.random() * (i + 1));
@@ -185,7 +186,7 @@ export class CinematicCameraDirector {
           this.remaining[i],
         ];
       }
-      if (!previous) {
+      if (previous === '') {
         const side = this.remaining.indexOf('side');
         [this.remaining[0], this.remaining[side]] = [
           this.remaining[side],
@@ -201,13 +202,13 @@ export class CinematicCameraDirector {
     }
     this.shot = this.remaining.shift()!;
     this.rebase(distance);
-    if (this.pass && velocity > 0) {
+    if (this.pass != null && velocity > 0) {
       this.pass.segmentLength = Math.max(
         180,
         velocity * MINIMUM_STATIONARY_SHOT_DURATION_SECONDS,
       );
     }
-    this.from = this.pass ? null : previousPose;
+    this.from = this.pass != null ? null : previousPose;
   }
   rebase(distance: number) {
     this.elapsed = 0;
@@ -229,15 +230,16 @@ export class CinematicCameraDirector {
       return false;
     }
     this.elapsed += deltaSeconds;
-    const hasFinishedPass = this.pass
-      ? this.pass.advance(
-          processingRate,
-          deltaSeconds,
-          distance,
-          visualSpeed,
-          false,
-        )
-      : this.elapsed >= 16;
+    const hasFinishedPass =
+      this.pass != null
+        ? this.pass.advance(
+            processingRate,
+            deltaSeconds,
+            distance,
+            visualSpeed,
+            false,
+          )
+        : this.elapsed >= 16;
     if (hasFinishedPass && shouldAdvanceAutomatically) {
       this.next(distance, visualSpeed);
     }
@@ -245,7 +247,7 @@ export class CinematicCameraDirector {
   }
   pose(): CameraPose {
     const to = trackingPose(this.shot);
-    if (!this.from || this.elapsed >= 4) {
+    if (this.from == null || this.elapsed >= 4) {
       return to;
     }
     const t = Math.min(1, this.elapsed / 4);
@@ -341,7 +343,7 @@ export function sceneRange(
   aspect: number,
   segmentLength = 0,
 ) {
-  if (!segmentLength) {
+  if (segmentLength === 0) {
     return pose.eye[2] > pose.target[2]
       ? {near: -660, far: 180}
       : {near: -180, far: 660};

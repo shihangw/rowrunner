@@ -31,7 +31,8 @@ export function createProgressServer({
       const url = new URL(request.url ?? '/', 'http://localhost');
       // This sink is a local development service. Do not accept browser writes from other origins.
       if (
-        request.headers.origin &&
+        request.headers.origin != null &&
+        request.headers.origin !== '' &&
         request.headers.origin !== `http://${request.headers.host}`
       ) {
         return sendJSONResponse(response, 403, {error: 'Origin rejected'});
@@ -40,7 +41,7 @@ export function createProgressServer({
         /^\/api\/runs\/([a-zA-Z0-9_-]{1,80})\/(progress|events)$/.exec(
           url.pathname,
         );
-      if (route) {
+      if (route != null) {
         const [, runId, resource] = route;
         if (resource === 'events' && request.method === 'GET') {
           if (
@@ -64,7 +65,7 @@ export function createProgressServer({
           }
           eventListenersByRunID.get(runId)!.add(response);
           const latest = progressSinksByRunID.get(runId)?.latest;
-          if (latest) {
+          if (latest != null) {
             response.write(`data: ${JSON.stringify(latest)}\n\n`);
           }
           const heartbeat = setInterval(
@@ -74,7 +75,7 @@ export function createProgressServer({
           request.on('close', () => {
             clearInterval(heartbeat);
             eventListenersByRunID.get(runId)?.delete(response);
-            if (!eventListenersByRunID.get(runId)?.size) {
+            if ((eventListenersByRunID.get(runId)?.size ?? 0) === 0) {
               eventListenersByRunID.delete(runId);
             }
           });
@@ -89,7 +90,8 @@ export function createProgressServer({
         }
         if (resource === 'progress' && request.method === 'POST') {
           if (
-            !request.headers['content-type']?.startsWith('application/json')
+            request.headers['content-type']?.startsWith('application/json') !==
+            true
           ) {
             return sendJSONResponse(response, 415, {
               error: 'Use application/json',
@@ -107,7 +109,7 @@ export function createProgressServer({
           }
           const requestPayload: unknown = JSON.parse(body);
           if (
-            !requestPayload ||
+            requestPayload == null ||
             typeof requestPayload !== 'object' ||
             Array.isArray(requestPayload)
           ) {
@@ -154,7 +156,7 @@ export function createProgressServer({
         return sendJSONResponse(response, 405, {error: 'Method not allowed'});
       }
       const asset = assets.get(url.pathname);
-      if (asset && request.method === 'GET') {
+      if (asset != null && request.method === 'GET') {
         const data = await readFile(asset[0]);
         response.writeHead(200, {
           'Content-Type': `${asset[1]}; charset=utf-8`,
