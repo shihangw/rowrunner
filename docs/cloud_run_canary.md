@@ -1,10 +1,15 @@
 # Private Cloud Run canary
 
-The private deployment repository runs the manual **Deploy Canary** workflow.
-It checks out an existing release tag from the public Rowrunner repository and
-deploys a Cloud Run canary. After QA, run **Ship** in the public repository with
-the same tag to deploy GitHub Pages and request npm release approval. Cloud Run
-requires Google authentication; public traffic cannot invoke the canary.
+The public **Canary Candidate** workflow creates a tag named
+`canary-pr-<number>-<sha>` after each pull request merges to `main`; its run
+summary shows the exact tag. The private deployment repository runs the manual
+**Deploy Canary** workflow. Select a candidate tag to check out and deploy its
+exact source. After QA, merge the Release Please version pull request. Run
+**Ship** in the public repository with the new release tag and the tested
+candidate tag. Ship checks that only version and changelog files changed between
+them. If other files changed, deploy and QA the release tag itself, then supply
+that same release tag in both Ship inputs. Cloud Run requires Google
+authentication; public traffic cannot invoke the canary.
 
 The container serves the compiled example and its custom progress API. Every
 example build polls [PublicNode](https://solana.publicnode.com/) directly from

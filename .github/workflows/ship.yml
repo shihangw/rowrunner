@@ -8,6 +8,10 @@ on:
         description: Existing GitHub release tag, for example v0.1.1
         required: true
         type: string
+      tested_tag:
+        description: QA-tested canary tag, or the release tag if recanaried
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -43,11 +47,30 @@ jobs:
           persist-credentials: false
       - name: Verify release source and version
         env:
+          GH_TOKEN: ${{ github.token }}
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          TESTED_TAG: ${{ inputs.tested_tag }}
         run: |
           git merge-base --is-ancestor HEAD origin/main
           test "$(node -p 'require("./package.json").version')" = "$RELEASE_VERSION"
           test "$(node -p 'require("./.release-please-manifest.json")["."]')" = "$RELEASE_VERSION"
+          if [[ "$TESTED_TAG" != "$RELEASE_TAG" ]]; then
+            [[ "$TESTED_TAG" =~ ^canary-pr-([1-9][0-9]*)-([0-9a-f]{12})$ ]]
+            pull_request_number="${BASH_REMATCH[1]}"
+            expected_prefix="${BASH_REMATCH[2]}"
+            tested_sha="$(git rev-parse --verify "refs/tags/$TESTED_TAG^{commit}")"
+            test "${tested_sha:0:12}" = "$expected_prefix"
+            merged_sha="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pull_request_number" --jq '.merge_commit_sha')"
+            test "$tested_sha" = "$merged_sha"
+            git merge-base --is-ancestor "$tested_sha" HEAD
+            if ! git diff --quiet "$tested_sha" HEAD -- . \
+              ':!package.json' ':!package-lock.json' \
+              ':!.release-please-manifest.json' ':!CHANGELOG.md'; then
+              echo '::error::Release includes changes not tested in the canary. Deploy the release tag to the canary and use it as tested_tag.'
+              exit 1
+            fi
+          fi
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:

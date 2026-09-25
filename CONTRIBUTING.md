@@ -74,7 +74,11 @@ The dry run allows already-published versions, so PRs do not need a version bump
 
 ## Versions and releases
 
-Release Please opens a version pull request after releasable commits reach `main`.
+Every merged pull request gets a unique `canary-pr-<number>-<sha>` tag on
+its merge commit. The **Canary Candidate** workflow writes the full tag in its
+run summary. Direct pushes to `main` do not get candidate tags. A candidate
+tag does not change the npm version or publish anything. Release Please also
+opens a version pull request after releasable commits reach `main`.
 Use Conventional Commit messages or squash PR titles: `fix:` increments the patch
 version, `feat:` increments the minor version, and `!` with a `BREAKING CHANGE:`
 footer marks a breaking change. Before 1.0, breaking changes increment the minor
@@ -83,10 +87,16 @@ The version pull request updates `package.json`, `package-lock.json`, the releas
 manifest, and the changelog together. Review and merge it when ready; ordinary
 feature PRs do not edit version numbers.
 
-Merging the version pull request creates a tagged GitHub release. First, run
-**Deploy Canary** in the private deployment repository with that tag and QA the
-[private Cloud Run canary](docs/cloud_run_canary.md). Then open **Actions → Ship →
-Run workflow** here from `main` with the same tag, for example `v0.1.1`.
+Run **Deploy Canary** in the private deployment repository with the candidate
+tag you want to test. QA the [private Cloud Run canary](docs/cloud_run_canary.md).
+After QA, merge the Release Please version pull request; this creates the npm
+version tag and GitHub release. Then open **Actions → Ship → Run workflow** here
+from `main`. Enter the new release tag, for example `v0.1.1`, and the candidate
+tag you tested as `tested_tag`.
+Ship rejects a release with non-release changes beyond the tested candidate;
+version and changelog files may differ. If other changes landed in the meantime,
+run **Deploy Canary** again with the release tag, QA it, and use that same release
+tag as `tested_tag`.
 The public workflow checks the tagged source, packs the library, and deploys
 the [public static example](https://shihangw.github.io/rowrunner/). It starts
 on live Solana totals and calls a browser-accessible RPC directly.
