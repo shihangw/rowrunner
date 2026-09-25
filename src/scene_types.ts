@@ -10,6 +10,7 @@ import type {
   PresetMetadataSchema,
   SkyDefinitionSchema,
   WorldPathSchema,
+  WorldMusicSchema,
   SceneDefinitionSchema,
   ProtagonistDefinitionSchema,
   SceneOptionsSchema,
@@ -114,6 +115,7 @@ export interface PathFrame {
   worldPoint(point: Vec3): Vec3;
 }
 export type WorldPath = z.infer<typeof WorldPathSchema>;
+export type WorldMusic = z.infer<typeof WorldMusicSchema>;
 export interface SceneFrame {
   readonly time: number;
   /** Frame step in seconds, capped at .05; zero under reduced motion. */
@@ -164,6 +166,7 @@ export interface ResolvedScene extends PresetMetadata {
   readonly road: boolean;
   readonly sky?: SkyDefinition;
   readonly path?: WorldPath;
+  readonly music?: WorldMusic | null;
   readonly draw?: DrawFunction;
   readonly create?: PluginFactory;
 }

@@ -49,6 +49,47 @@ cleanup hook fails. Preload external assets before creating the visualization.
 Worlds accept partial RGB `palette` overrides, `road: false` to hide the road,
 a `sky` fragment shader with per-frame uniforms, and an optional `path` adapter
 for curved coordinate systems. The default sky is a simple palette gradient.
+Worlds may also supply a `music` score. A score has a tempo in beats per minute,
+32 eighth-note `melody` positions (MIDI pitches or `null` rests), four `bass`
+pitches, and four three-note `chords`. Optional `wave` selects the lead's
+oscillator shape, `instrument: 'organ'` gives the lead and chords a sustained
+pipe-organ voice, `echo: true` adds a spacious delay, and `volume` sets that
+world's mix level. The score loops
+while its world is active; manual and scheduled world changes crossfade the
+music. Worlds without a score are silent; `music: null` silences an inherited
+score. Set `src` to a same-origin audio file URL to play a recorded loop for
+that world. The procedural score plays until the file is decoded and remains
+the fallback if it cannot load. For a Vite app, use a static
+`new URL('./music.mp3', import.meta.url).href` as `src`; Vite includes the file
+in the build. Call
+`await scene.setMusicEnabled(true)` from a click or other user gesture to start
+audio; it is off by default. Use `scene.setMusicEnabled(false)` to stop it, and
+`scene.musicEnabled` to read the current setting. `scene.dispose()` closes its
+audio context along with its rendering resources. The example's seven worlds
+bundle CC0 recorded tracks with original procedural scores as fallbacks, and
+its Customize panel has a music toggle.
+
+```ts
+const myWorld = defineWorld({
+  id: 'my-world',
+  draw(geometry, frame) {
+    // Draw scenery here.
+  },
+  music: {
+    tempo: 96,
+    melody: Array.from({length: 32}, (_, step) => (step % 4 === 0 ? 72 : null)),
+    bass: [48, 45, 50, 48],
+    chords: [
+      [60, 64, 67],
+      [57, 60, 64],
+      [62, 65, 69],
+      [60, 64, 67],
+    ],
+    wave: 'sine',
+  },
+});
+```
+
 Example-specific planets, storms, black holes, and model catalogs are outside
 the library. `@shihangw/rowrunner/geometry` exports road drawing helpers for custom paths.
 

@@ -1,4 +1,8 @@
 import {defineWorld} from '../shared/world_definition.js';
+const cloudHarborSoundtrackURL = new URL(
+  '../../assets/music/cloud_harbor.mp3',
+  import.meta.url,
+).href;
 import {drawHarbor} from './cloud_harbor_geometry.js';
 
 export const cloudHarbor = defineWorld({
@@ -6,6 +10,52 @@ export const cloudHarbor = defineWorld({
   name: 'Cloud Harbor',
   description: 'Sky islands, cargo ships, and orbital listening stations.',
   caption: 'Above and beyond.',
+  music: {
+    src: cloudHarborSoundtrackURL,
+    tempo: 84,
+    wave: 'sine',
+    melody: [
+      72,
+      null,
+      74,
+      null,
+      76,
+      null,
+      79,
+      null,
+      81,
+      null,
+      79,
+      null,
+      76,
+      null,
+      74,
+      null,
+      69,
+      null,
+      72,
+      null,
+      74,
+      null,
+      76,
+      null,
+      79,
+      null,
+      76,
+      null,
+      74,
+      null,
+      72,
+      null,
+    ],
+    bass: [48, 45, 50, 48],
+    chords: [
+      [60, 64, 67],
+      [57, 60, 64],
+      [62, 65, 69],
+      [60, 64, 67],
+    ],
+  },
   palette: {
     sky: [0.13, 0.31, 0.46],
     horizon: [0.59, 0.73, 0.77],

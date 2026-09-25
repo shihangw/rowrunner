@@ -170,6 +170,25 @@ export function startDashboard(
       ? 'Auto journey on'
       : 'Hold this biome';
   };
+  elementWithID<HTMLButtonElement>('music-toggle').onclick = async () => {
+    if (roadScene == null) {
+      return;
+    }
+    const enabled = !roadScene.musicEnabled;
+    try {
+      await roadScene.setMusicEnabled(enabled);
+      elementWithID('music-toggle').setAttribute(
+        'aria-pressed',
+        String(roadScene.musicEnabled),
+      );
+      elementWithID('music-toggle').textContent = roadScene.musicEnabled
+        ? 'Music on'
+        : 'Music off';
+    } catch (error) {
+      elementWithID('announcement').textContent =
+        `Could not start music: ${String(error)}`;
+    }
+  };
 
   let inputMode = 'demo';
   let progressEventSource: EventSource | null = null;
@@ -542,5 +561,8 @@ export function startDashboard(
   window.addEventListener('pagehide', () => {
     progressEventSource?.close();
     stopProgressPolling?.();
+    void roadScene?.setMusicEnabled(false);
+    elementWithID('music-toggle').setAttribute('aria-pressed', 'false');
+    elementWithID('music-toggle').textContent = 'Music off';
   });
 }

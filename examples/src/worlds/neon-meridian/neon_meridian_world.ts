@@ -1,4 +1,8 @@
 import {defineWorld} from '../shared/world_definition.js';
+const neonMeridianSoundtrackURL = new URL(
+  '../../assets/music/neon_meridian.mp3',
+  import.meta.url,
+).href;
 import {drawNeon} from './neon_meridian_geometry.js';
 
 export const neonMeridian = defineWorld({
@@ -7,6 +11,52 @@ export const neonMeridian = defineWorld({
   description:
     'Neon storefronts, layered city districts, rooftop antennas, and a towering off-world skyline.',
   caption: 'The city never stops.',
+  music: {
+    src: neonMeridianSoundtrackURL,
+    tempo: 112,
+    wave: 'sawtooth',
+    melody: [
+      69,
+      72,
+      76,
+      null,
+      79,
+      76,
+      72,
+      null,
+      67,
+      71,
+      74,
+      null,
+      79,
+      74,
+      71,
+      null,
+      69,
+      72,
+      76,
+      81,
+      79,
+      null,
+      76,
+      null,
+      67,
+      71,
+      74,
+      79,
+      76,
+      74,
+      71,
+      null,
+    ],
+    bass: [45, 43, 41, 43],
+    chords: [
+      [57, 60, 64],
+      [55, 59, 62],
+      [53, 57, 60],
+      [55, 59, 62],
+    ],
+  },
   palette: {
     sky: [0.012, 0.022, 0.058],
     horizon: [0.1, 0.18, 0.23],

@@ -1,4 +1,8 @@
 import {defineWorld} from '../shared/world_definition.js';
+const ionGlacierSoundtrackURL = new URL(
+  '../../assets/music/ion_glacier.mp3',
+  import.meta.url,
+).href;
 import {drawTerrain} from '../shared/terrain_geometry.js';
 
 export const ionGlacier = defineWorld({
@@ -7,6 +11,52 @@ export const ionGlacier = defineWorld({
   description:
     'Icy foothills, distant snow-tipped mountain ranges, and turquoise crystals beneath an aurora.',
   caption: 'A clear path forward.',
+  music: {
+    src: ionGlacierSoundtrackURL,
+    tempo: 76,
+    wave: 'sine',
+    melody: [
+      74,
+      null,
+      null,
+      77,
+      null,
+      81,
+      null,
+      84,
+      82,
+      null,
+      null,
+      79,
+      null,
+      77,
+      null,
+      null,
+      72,
+      null,
+      76,
+      null,
+      79,
+      null,
+      81,
+      null,
+      77,
+      null,
+      76,
+      null,
+      74,
+      null,
+      null,
+      null,
+    ],
+    bass: [38, 41, 43, 38],
+    chords: [
+      [50, 53, 57],
+      [53, 57, 60],
+      [55, 58, 62],
+      [50, 53, 57],
+    ],
+  },
   palette: {
     sky: [0.015, 0.04, 0.1],
     horizon: [0.12, 0.32, 0.36],

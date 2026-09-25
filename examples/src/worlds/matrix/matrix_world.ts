@@ -1,4 +1,8 @@
 import {defineWorld} from '../shared/world_definition.js';
+const matrixSoundtrackURL = new URL(
+  '../../assets/music/matrix.mp3',
+  import.meta.url,
+).href;
 import {drawMatrix} from './matrix_geometry.js';
 
 export const matrix = defineWorld({
@@ -7,6 +11,52 @@ export const matrix = defineWorld({
   description:
     'Layered green code curtains, server clusters, distant data towers, and a glowing circuit grid.',
   caption: 'Follow the signal.',
+  music: {
+    src: matrixSoundtrackURL,
+    tempo: 128,
+    wave: 'square',
+    melody: [
+      76,
+      null,
+      79,
+      76,
+      null,
+      83,
+      79,
+      null,
+      74,
+      77,
+      null,
+      81,
+      77,
+      null,
+      74,
+      null,
+      76,
+      79,
+      null,
+      83,
+      86,
+      83,
+      79,
+      null,
+      74,
+      null,
+      77,
+      81,
+      null,
+      77,
+      74,
+      null,
+    ],
+    bass: [40, 38, 36, 38],
+    chords: [
+      [52, 55, 59],
+      [50, 53, 57],
+      [48, 52, 55],
+      [50, 53, 57],
+    ],
+  },
   palette: {
     sky: [0.001, 0.009, 0.004],
     horizon: [0.012, 0.065, 0.026],

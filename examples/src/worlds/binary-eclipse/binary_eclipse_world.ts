@@ -1,4 +1,8 @@
 import {defineWorld} from '../shared/world_definition.js';
+const binaryEclipseSoundtrackURL = new URL(
+  '../../assets/music/binary_eclipse.mp3',
+  import.meta.url,
+).href;
 import {createBinaryOrbit, orbitCamera} from './binary_eclipse_orbit.js';
 
 export const binaryEclipse = defineWorld({
@@ -7,6 +11,23 @@ export const binaryEclipse = defineWorld({
   description:
     'A distant orbital road around two enormous stationary black holes, with amber and icy-blue halos and curved arcs of light.',
   caption: 'Between two infinities.',
+  music: {
+    src: binaryEclipseSoundtrackURL,
+    tempo: 68,
+    instrument: 'organ',
+    echo: true,
+    melody: [
+      62, 69, 74, 77, 81, 77, 74, 69, 58, 65, 70, 74, 77, 74, 70, 65, 65, 72,
+      77, 81, 84, 81, 77, 72, 60, 67, 72, 74, 79, 74, 72, 67,
+    ],
+    bass: [38, 34, 41, 36],
+    chords: [
+      [50, 53, 57],
+      [46, 50, 53],
+      [53, 57, 60],
+      [48, 55, 62],
+    ],
+  },
   palette: {
     sky: [0.003, 0.004, 0.015],
     horizon: [0.008, 0.007, 0.021],

@@ -85,6 +85,23 @@ export const WorldPathSchema = z
     fogDistance: z.number().nonnegative().optional(),
   })
   .readonly();
+/** A four-bar, looping score. MIDI notes use 60 for middle C; null is a rest. */
+export const WorldMusicSchema = z
+  .object({
+    tempo: z.number().finite().min(40).max(200),
+    melody: z.array(z.number().int().min(24).max(108).nullable()).length(32),
+    bass: z.array(z.number().int().min(24).max(84)).length(4),
+    chords: z
+      .array(z.array(z.number().int().min(36).max(96)).length(3))
+      .length(4),
+    wave: z.enum(['sine', 'triangle', 'sawtooth', 'square']).optional(),
+    instrument: z.enum(['synth', 'organ']).optional(),
+    echo: z.boolean().optional(),
+    /** Optional recorded loop; the score plays while it loads or if it fails. */
+    src: z.string().min(1).optional(),
+    volume: z.number().finite().min(0).max(1).optional(),
+  })
+  .readonly();
 const definition = {
   id: DefinitionIdSchema,
   name: z.string().optional(),
@@ -101,6 +118,8 @@ export const SceneDefinitionSchema = z.object({
   palette: PaletteOverridesSchema.optional(),
   sky: SkyDefinitionSchema.optional(),
   path: WorldPathSchema.optional(),
+  /** Optional original score, played only after the viewer enables audio. */
+  music: WorldMusicSchema.nullable().optional(),
   /** Show the built-in road and contact shadow. Default true. */
   road: z.boolean().optional(),
 });
