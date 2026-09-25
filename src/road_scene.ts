@@ -105,6 +105,7 @@ export class RoadScene {
   autoBiomes: boolean;
   roadEffect: RoadEffect;
   speedScale: SpeedScale;
+  visualRateMultiplier: number;
   distance: number;
   private time: number;
   private cameraTime: number;
@@ -160,6 +161,7 @@ export class RoadScene {
       runners,
       roadEffect = 'none',
       speedScale = 'logarithmic',
+      visualRateMultiplier = 1,
     }: SceneOptions = {},
   ) {
     const alias = <T>(
@@ -246,6 +248,11 @@ export class RoadScene {
     )!;
     this.roadEffect = validateRoadEffect(roadEffect);
     this.speedScale = validateSpeedScale(speedScale);
+    this.visualRateMultiplier = parseInput(
+      SceneOptionsSchema.shape.visualRateMultiplier,
+      visualRateMultiplier,
+      'visualRateMultiplier',
+    )!;
     this.cameraTime = 0;
     this.stationaryPass = new StationaryCameraPass();
     this.worldElapsedSeconds = 0;
@@ -330,6 +337,13 @@ export class RoadScene {
   }
   setSpeedScale(scale: SpeedScale) {
     this.speedScale = validateSpeedScale(scale);
+  }
+  setVisualRateMultiplier(multiplier: number) {
+    this.visualRateMultiplier = parseInput(
+      SceneOptionsSchema.shape.visualRateMultiplier,
+      multiplier,
+      'visualRateMultiplier',
+    )!;
   }
   get protagonist() {
     return this.mascotPreset;
@@ -762,7 +776,13 @@ export class RoadScene {
     const frameDeltaSeconds = Math.min(deltaSeconds, 0.05);
     const visualSpeed = isMotionReduced
       ? 0
-      : travelSpeed(processingRate, this.speedScale);
+      : travelSpeed(
+          Math.min(
+            Number.MAX_VALUE,
+            processingRate * (this.visualRateMultiplier ?? 1),
+          ),
+          this.speedScale,
+        );
     let cinematicWorldChangeRequested = false;
     this.worldElapsedSeconds ??= 0;
     if (

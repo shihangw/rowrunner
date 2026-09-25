@@ -66,7 +66,11 @@ const runner = defineRunner({
     };
   },
 });
-const options: SceneOptions = {worlds: [world], runners: [runner]};
+const options: SceneOptions = {
+  worlds: [world],
+  runners: [runner],
+  visualRateMultiplier: 12.5,
+};
 const parsedOptions: SceneOptions = SceneOptionsSchema.parse(options);
 const parsedWorld: z.infer<typeof WorldPluginSchema> = world;
 void [parsedOptions, parsedWorld];
@@ -74,6 +78,7 @@ function mount(canvas: HTMLCanvasElement) {
   const scene = new RoadScene(canvas, options);
   scene.render(smoother.step(sink.snapshot().targetRate, 1 / 60), 1 / 60);
   scene.setRunner(runner.id);
+  scene.setVisualRateMultiplier(2);
   scene.dispose();
 }
 // Validate the generated declarations reject invalid public input.

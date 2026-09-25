@@ -79,8 +79,12 @@ for at least six seconds. `render(rate, dt, { completed: true })` temporarily
 uses the approaching camera. `CompletionCelebration` from `@shihangw/rowrunner/scene`
 provides the persistent configurable heading and looping confetti.
 
-The default logarithmic speed curve makes 80/s feel fast while keeping large
-rates legible. Set `speedScale: 'linear'` to opt out. `roadEffect: 'renewal'`
+The default logarithmic speed curve maps 100 events/s to 40 scene units/s while
+keeping large rates legible. Set `speedScale: 'linear'` to opt out. For a slower
+stream, set `visualRateMultiplier: 12.5` so 8/s moves exactly like 100/s at the
+default setting. The multiplier defaults to 1 and can be changed at runtime
+with `scene.setVisualRateMultiplier(12.5)`. It scales only the rate used for
+scene travel; the reported events/second stays exact. `roadEffect: 'renewal'`
 lights and polishes the road behind the runner. These are decorative effects;
 progress totals and timestamps remain exact.
 

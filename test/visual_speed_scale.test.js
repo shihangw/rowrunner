@@ -13,9 +13,10 @@ import {
 
 test('visual speed lifts cruise, compresses boost, and stops continuously at zero', () => {
   assert.equal(travelSpeed(0), 0);
-  assert.equal(travelSpeed(80), 40);
-  assert.ok(travelSpeed(500) > 65 && travelSpeed(500) < 66);
-  assert.ok(travelSpeed(1800) > 83 && travelSpeed(1800) < 84);
+  assert.equal(travelSpeed(100), 40);
+  assert.equal(travelSpeed(8 * 12.5), travelSpeed(100));
+  assert.ok(travelSpeed(500) > 62 && travelSpeed(500) < 63);
+  assert.equal(travelSpeed(1800), 80);
   assert.ok(travelSpeed(1e-9) < 1e-8);
   let previous = 0;
   for (const rate of [
@@ -23,6 +24,7 @@ test('visual speed lifts cruise, compresses boost, and stops continuously at zer
     0.1,
     1,
     80,
+    100,
     500,
     1800,
     1e6,
@@ -36,6 +38,10 @@ test('visual speed lifts cruise, compresses boost, and stops continuously at zer
   assert.equal(travelSpeed(80, 'linear'), 6);
   assert.equal(travelSpeed(1800, 'linear'), 135);
   assert.throws(() => new RoadScene(null, {speedScale: 'invalid'}), RangeError);
+  assert.throws(
+    () => new RoadScene(null, {visualRateMultiplier: 0}),
+    TypeError,
+  );
 });
 
 test('all cameras share visual travel while custom callbacks retain the original rate', () => {
@@ -50,7 +56,7 @@ test('all cameras share visual travel while custom callbacks retain the original
   try {
     for (const mode of CAMERA_MODES) {
       for (const scale of ['logarithmic', 'linear']) {
-        for (const rate of [80, 500, 1800]) {
+        for (const rate of [8, 80, 500, 1800]) {
           let frame;
           const scene = Object.assign(Object.create(RoadScene.prototype), {
             scenes: sceneCatalog([{id: 'empty', road: false, draw() {}}]),
@@ -66,6 +72,7 @@ test('all cameras share visual travel while custom callbacks retain the original
             mascotPreset: 'probe',
             cameraMode: mode,
             speedScale: scale,
+            visualRateMultiplier: 1,
             distance: 0,
             time: 0,
             cameraTime: 0,
@@ -87,6 +94,29 @@ test('all cameras share visual travel while custom callbacks retain the original
           assert.ok(Math.abs(scene.distance - travelSpeed(rate, scale)) < 1e-8);
           assert.equal(frame.rate, rate);
           assert.equal(frame.visualSpeed, travelSpeed(rate, scale));
+          if (rate === 8) {
+            const distanceBeforeBoost = scene.distance;
+            scene.setVisualRateMultiplier(12.5);
+            scene.render(rate, 0.05);
+            assert.ok(
+              Math.abs(
+                scene.distance -
+                  distanceBeforeBoost -
+                  travelSpeed(100, scale) * 0.05,
+              ) < 1e-8,
+            );
+            assert.equal(frame.rate, rate);
+            assert.equal(frame.visualSpeed, travelSpeed(100, scale));
+            scene.setVisualRateMultiplier(1);
+            scene.render(rate, 0);
+          }
+          for (const invalidMultiplier of [0, -1, NaN, Infinity]) {
+            assert.throws(
+              () => scene.setVisualRateMultiplier(invalidMultiplier),
+              TypeError,
+            );
+            assert.equal(scene.visualRateMultiplier, 1);
+          }
           if (mode === 'stationary') {
             assert.equal(
               scene.stationaryPass.segmentLength,

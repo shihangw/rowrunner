@@ -148,6 +148,13 @@ export function startDashboard(
         elementWithID<HTMLSelectElement>('road-effect').value,
       ),
     );
+  elementWithID<HTMLSelectElement>('visual-rate-multiplier').value = String(
+    roadScene?.visualRateMultiplier ?? sceneOptions.visualRateMultiplier ?? 1,
+  );
+  elementWithID<HTMLSelectElement>('visual-rate-multiplier').onchange = () =>
+    roadScene?.setVisualRateMultiplier(
+      Number(elementWithID<HTMLSelectElement>('visual-rate-multiplier').value),
+    );
   elementWithID<HTMLSelectElement>('camera-mode').onchange = () =>
     roadScene?.setCamera(
       CameraModeSchema.parse(
@@ -167,7 +174,7 @@ export function startDashboard(
   let inputMode = 'demo';
   let progressEventSource: EventSource | null = null;
   let stopProgressPolling: (() => void) | undefined;
-  let demoProcessingRate = 500;
+  let demoProcessingRate = 100;
   let demoCompletedCount = 0;
   let isDemoPaused = false;
   let isSignalLost = false;

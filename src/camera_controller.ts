@@ -61,10 +61,10 @@ export function travelSpeed(
   if (!Number.isFinite(processingRate) || processingRate <= 0) {
     return 0;
   }
-  // Make 80/s a fast cruise, then compress higher throughput into controlled boosts.
+  // Anchor 100 events/s at 40 world units/s, then compress higher throughput.
   return speedScale === 'linear'
     ? processingRate * 0.075
-    : 40 * (Math.log1p(processingRate / 5) / Math.log(17));
+    : 40 * (Math.log1p(processingRate / 6.25) / Math.log(17));
 }
 const MINIMUM_STATIONARY_SHOT_DURATION_SECONDS = 6;
 const STATIONARY_SHOTS = [
