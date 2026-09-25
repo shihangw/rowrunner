@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import {setImmediate} from 'node:timers/promises';
 import {ProgressSink} from '@shihangw/rowrunner';
 import {startProgressPolling} from '../examples/src/inputs/progress_polling_input.ts';
-import {readSolanaTransactionProgress} from '../examples/src/inputs/solana_transaction_source.ts';
+import {
+  readSolanaTransactionProgress,
+  SOLANA_PUBLIC_RPC_URL,
+} from '../examples/src/inputs/solana_transaction_source.ts';
 
 const sample = (sequence = 0) => ({
   runId: 'solana-mainnet',
@@ -128,7 +131,7 @@ test('Solana adapter reads finalized totals and rejects failed or malformed RPC 
   const progress = await readSolanaTransactionProgress(
     signal,
     async (url, options) => {
-      assert.equal(url, 'https://api.mainnet.solana.com');
+      assert.equal(url, SOLANA_PUBLIC_RPC_URL);
       assert.equal(options.signal, signal);
       assert.deepEqual(JSON.parse(options.body), {
         jsonrpc: '2.0',

@@ -86,12 +86,13 @@ feature PRs do not edit version numbers.
 Merging the version pull request creates a tagged GitHub release. To ship it,
 open **Actions → Ship → Run workflow** from `main` and enter that release tag,
 for example `v0.1.1`. The workflow checks the tagged source, packs the library,
-and deploys the example to the [canary site](https://shihangw.github.io/rowrunner/).
-The static preview shows simulated migration progress; live inputs need the Node
-server from the local example. The preview is replaced when a newer candidate is
-shipped.
+and deploys a [public static example](https://shihangw.github.io/rowrunner/)
+plus a [private Cloud Run canary](docs/cloud_run_canary.md). The public example
+starts on live Solana totals and calls a browser-accessible RPC directly. The
+canary includes the Node progress API for custom jobs. The release
+workflow deploys both from the same tag before requesting QA approval.
 
-After checking the preview, approve the waiting **npm-release** deployment in
+After checking the canary, approve the waiting **npm-release** deployment in
 GitHub Actions. The workflow verifies the saved tarball and publishes that exact
 candidate as npm `latest`. Rejecting the deployment leaves npm unchanged. The
 `npm-release` environment must require reviewer `shihangw`; the GitHub Pages site

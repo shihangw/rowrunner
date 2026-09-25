@@ -68,6 +68,11 @@ test('HTTP input validation, body limits, and static file allowlist', async (t) 
     403,
   );
   assert.equal(
+    (await post(good, 'migration', {Origin: root.replace('http:', 'https:')}))
+      .status,
+    200,
+  );
+  assert.equal(
     (await post(good, 'migration', {'Content-Type': 'text/plain'})).status,
     415,
   );

@@ -33,7 +33,8 @@ export function createProgressServer({
       if (
         request.headers.origin != null &&
         request.headers.origin !== '' &&
-        request.headers.origin !== `http://${request.headers.host}`
+        request.headers.origin !== `http://${request.headers.host}` &&
+        request.headers.origin !== `https://${request.headers.host}`
       ) {
         return sendJSONResponse(response, 403, {error: 'Origin rejected'});
       }

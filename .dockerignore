@@ -1,0 +1,10 @@
+.git
+.github
+node_modules
+dist
+examples/dist
+docs
+test
+type-tests
+*.tgz
+gha-creds-*.json

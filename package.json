@@ -44,7 +44,7 @@
     "prepack": "npm run lint && npm test",
     "typecheck": "npm run typecheck --workspace examples && npm run test:types",
     "build:example": "npm run build --workspace examples",
-    "build:canary": "npm run typecheck --workspace examples && npm exec --workspace examples -- vite build --base=/rowrunner/",
+    "build:public": "npm run typecheck --workspace examples && VITE_ENABLE_BACKEND=false npm exec --workspace examples -- vite build --base=/rowrunner/",
     "build": "tsc -p tsconfig.json",
     "test:types": "tsc --noEmit -p type-tests/tsconfig.json",
     "format": "prettier --write .",
