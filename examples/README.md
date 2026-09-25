@@ -13,8 +13,10 @@ npm start
 ```
 
 Open http://127.0.0.1:3000. One process serves the app and `/api/runs/:id`.
-The [canary preview](https://shihangw.github.io/rowrunner/) is a static build for
-QA. It supports the simulated demo and has no live-input server.
+The [public example](https://shihangw.github.io/rowrunner/) is a static build.
+It starts with live Solana input and has no custom progress API. The
+[private Cloud Run canary](../docs/cloud_run_canary.md) serves the full example
+and its Node API for release QA.
 The demo starts at 500 rows/second. The Customize panel switches worlds,
 runners, cameras, road renewal, and automatic world changes.
 Set `worldSwitchIntervalSeconds` in `src/example_configuration.ts` to change the
@@ -23,7 +25,9 @@ changes world and camera together, then fades in.
 
 Choose **Live input → Solana transactions** to fetch finalized mainnet transaction
 totals immediately and every **2 seconds**. The speed estimate appears after the
-second sample. The example server proxies the public RPC; no API key is needed.
+second sample. Every version of the example calls
+[PublicNode's Solana RPC](https://solana.publicnode.com/) directly from the
+browser. No API key is needed.
 Failures leave the last confirmed count intact and retry on the next interval.
 Switching inputs cancels the timer and pending request. **Custom progress** retains
 the HTTP/SSE input for your own jobs.
@@ -43,8 +47,12 @@ npm run build --workspace examples
 npm run producer --workspace examples  # Choose Live input → Custom progress in the browser.
 ```
 
-`build` emits the browser app into `dist/`; the HTTP sink is a separate Node API
-when deploying that static build. `example_http_server.ts` is the local development server.
+`build` emits the browser app into `dist/`. The public build sets
+`VITE_ENABLE_BACKEND=false`, which starts live Solana input and hides the
+custom-progress controls. Local development and the container canary default
+to `true`, so their Node servers expose the custom HTTP/SSE progress API.
+Solana always uses the browser RPC; disabling the backend does not change its
+source. The public static example has no Node backend.
 `@shihangw/rowrunner: file:..` links the library in this repository. In a separate app,
 replace it with the published Rowrunner version.
 
@@ -57,7 +65,7 @@ replace it with the published Rowrunner version.
 - `src/runners/<name>/<name>_runner.ts`: runner definitions.
 - `src/progress_dashboard.ts` and `src/progress_history.ts`: HUD and live/demo controls.
 - `src/inputs/progress_polling_input.ts`: cancellable polling with a 2-second default.
-- `src/inputs/solana_transaction_source.ts`: server-side adapter for finalized network totals.
+- `src/inputs/solana_transaction_source.ts`: finalized network totals from Solana's public RPC.
 - `example_http_server.ts`: Vite and the progress API on one port.
 - `example_progress_producer.ts`: sample HTTP producer.
 

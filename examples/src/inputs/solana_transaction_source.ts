@@ -6,13 +6,14 @@ const TransactionCountResponseSchema = z.object({
   id: z.literal(1),
   result: z.number().int().nonnegative(),
 });
+export const SOLANA_PUBLIC_RPC_URL = 'https://solana-rpc.publicnode.com';
 
-/** Server-side adapter. Timestamp records observation time because this RPC returns no measurement time. */
+/** Reads Solana's public RPC and timestamps the observation of its count. */
 export async function readSolanaTransactionProgress(
   signal: AbortSignal,
   request: typeof fetch = fetch,
 ): Promise<ProgressSample> {
-  const response = await request('https://api.mainnet.solana.com', {
+  const response = await request(SOLANA_PUBLIC_RPC_URL, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({

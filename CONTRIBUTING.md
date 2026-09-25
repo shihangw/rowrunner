@@ -74,7 +74,11 @@ The dry run allows already-published versions, so PRs do not need a version bump
 
 ## Versions and releases
 
-Release Please opens a version pull request after releasable commits reach `main`.
+Every merged pull request gets a unique `canary-pr-<number>-<sha>` tag on
+its merge commit. The **Canary Candidate** workflow writes the full tag in its
+run summary. Direct pushes to `main` do not get candidate tags. A candidate
+tag does not change the npm version or publish anything. Release Please also
+opens a version pull request after releasable commits reach `main`.
 Use Conventional Commit messages or squash PR titles: `fix:` increments the patch
 version, `feat:` increments the minor version, and `!` with a `BREAKING CHANGE:`
 footer marks a breaking change. Before 1.0, breaking changes increment the minor
@@ -83,15 +87,22 @@ The version pull request updates `package.json`, `package-lock.json`, the releas
 manifest, and the changelog together. Review and merge it when ready; ordinary
 feature PRs do not edit version numbers.
 
-Merging the version pull request creates a tagged GitHub release. To ship it,
-open **Actions → Ship → Run workflow** from `main` and enter that release tag,
-for example `v0.1.1`. The workflow checks the tagged source, packs the library,
-and deploys the example to the [canary site](https://shihangw.github.io/rowrunner/).
-The static preview shows simulated migration progress; live inputs need the Node
-server from the local example. The preview is replaced when a newer candidate is
-shipped.
+Run **Deploy Canary** in the private deployment repository with the candidate
+tag you want to test. QA the [private Cloud Run canary](docs/cloud_run_canary.md).
+After QA, merge the Release Please version pull request; this creates the npm
+version tag and GitHub release. Run **Promote Canary** in the private deployment
+repository with that release tag, the candidate tag you tested, and the
+successful Deploy Canary run ID from its URL. Promote verifies the canary run
+and triggers public **Ship** with those tags.
+Ship rejects a release with non-release changes beyond the tested candidate;
+version and changelog files may differ. If other changes landed in the meantime,
+run **Deploy Canary** again with the release tag, QA it, and use that same release
+tag as `tested_tag` in Promote.
+The public workflow checks the tagged source, packs the library, and deploys
+the [public static example](https://shihangw.github.io/rowrunner/). It starts
+on live Solana totals and calls a browser-accessible RPC directly.
 
-After checking the preview, approve the waiting **npm-release** deployment in
+After checking the public example, approve the waiting **npm-release** deployment in
 GitHub Actions. The workflow verifies the saved tarball and publishes that exact
 candidate as npm `latest`. Rejecting the deployment leaves npm unchanged. The
 `npm-release` environment must require reviewer `shihangw`; the GitHub Pages site

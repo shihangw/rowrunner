@@ -12,5 +12,10 @@
     "skipLibCheck": true,
     "types": ["node", "vite/client"]
   },
-  "include": ["src", "example_http_server.ts", "example_progress_producer.ts"]
+  "include": [
+    "src",
+    "example_http_server.ts",
+    "example_progress_producer.ts",
+    "production_http_server.ts"
+  ]
 }

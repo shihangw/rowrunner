@@ -39,5 +39,11 @@ jobs:
         run: npm run check
       - name: Build example
         run: npm run build:example
+      - name: Build canary container
+        if: matrix.node == '24'
+        run: docker build --tag rowrunner-canary:ci .
+      - name: Build public static example
+        if: matrix.node == '24'
+        run: npm run build:public
       - name: Verify npm package and publish dry run
         run: npm run check:package

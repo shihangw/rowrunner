@@ -13,6 +13,7 @@ import {CameraModeSchema, RoadEffectSchema} from '@shihangw/rowrunner/schemas';
 import type {ProgressSample, ProgressSnapshot} from '@shihangw/rowrunner';
 import {ProgressHistory} from './progress_history.ts';
 import {startProgressPolling} from './inputs/progress_polling_input.ts';
+import {readSolanaTransactionProgress} from './inputs/solana_transaction_source.ts';
 
 export function startDashboard(
   sceneOptions: SceneOptions,
@@ -260,18 +261,7 @@ export function startDashboard(
       elementWithID('solana-connection').textContent = 'Connecting…';
       stopProgressPolling = startProgressPolling({
         intervalMilliseconds: 2_000,
-        async readSample(signal) {
-          const response = await fetch('/api/public/solana/progress', {
-            signal,
-            cache: 'no-store',
-          });
-          if (!response.ok) {
-            throw new Error(
-              `Progress request returned HTTP ${response.status}`,
-            );
-          }
-          return ProgressSampleSchema.parse(await response.json());
-        },
+        readSample: readSolanaTransactionProgress,
         onSample(sample) {
           acceptSample(sample);
           elementWithID('solana-connection').textContent =
@@ -380,6 +370,9 @@ export function startDashboard(
     publishDemoProgress(lastDemoTimestamp);
     updateDemoControls();
   };
+  if (import.meta.env.VITE_ENABLE_BACKEND === 'false') {
+    setProgressInputMode('live');
+  }
 
   function formattedTimeRemaining(seconds: number | null) {
     if (seconds === null) {

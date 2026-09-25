@@ -2,6 +2,8 @@
 
 **Make long-running work fun to watch.**
 
+[Try the live Solana example](https://shihangw.github.io/rowrunner/) in your browser.
+
 Rowrunner turns a stream of progress counts into a moving 3D world. Your migration
 processes 500 rows a second; Bookie flies down a neon road, the speedometer shows
 the pace, and the progress chart climbs toward completion. When the job finishes,
