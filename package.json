@@ -48,7 +48,9 @@
     "test:types": "tsc --noEmit -p type-tests/tsconfig.json",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "prelint": "npm run build",
     "lint": "eslint . --max-warnings=0",
+    "prelint:fix": "npm run build",
     "lint:fix": "eslint . --fix --max-warnings=0",
     "check": "npm run lint && npm run format:check && npm run typecheck && npm test",
     "check:package": "npm run build && node scripts/check_package.mjs"

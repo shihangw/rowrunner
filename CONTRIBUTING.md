@@ -45,6 +45,8 @@ ESLint extends Google's `gts` preset and adds strict boolean conditions for
 TypeScript. Prettier owns layout. TypeScript is
 pinned to a version supported by TypeScript ESLint. Upgrade them together.
 Generated build output and vendored assets are excluded from lint and formatting.
+The lint commands build declarations first because type-aware rules resolve the
+example's imports through the library's published entrypoints.
 
 ## Checks
 
