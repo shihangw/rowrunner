@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx ExampleHTTPServer.ts",
+    "dev": "tsx example_http_server.ts",
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit && vite build",
-    "producer": "tsx ExampleProgressProducer.ts",
+    "producer": "tsx example_progress_producer.ts",
     "predev": "npm run build --prefix ..",
     "prebuild": "npm run build --prefix ..",
     "pretypecheck": "npm run build --prefix .."

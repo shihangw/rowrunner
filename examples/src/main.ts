@@ -1,4 +1,4 @@
-import { startDashboard } from './ProgressDashboard.ts';
-import { sceneOptions, celebrationOptions } from './ExampleConfiguration.ts';
+import {startDashboard} from './progress_dashboard.ts';
+import {sceneOptions, celebrationOptions} from './example_configuration.ts';
 
 startDashboard(sceneOptions, celebrationOptions);

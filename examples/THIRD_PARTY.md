@@ -13,7 +13,7 @@ Selected 3D assets from **Space Kit**, created by **Kenney**, are used by the ex
   `rock_largeB`.
 
 Original OBJ/MTL source files and the unmodified license are in `src/assets/`.
-`../scripts/ImportKenneySpaceKit.mjs` triangulates OBJ faces, rounds positions and colors,
+`../scripts/import_kenney_space_kit.mjs` triangulates OBJ faces, rounds positions and colors,
 and embeds a subset in `src/assets/space-kit.js`. The renderer scales, rotates,
 and sometimes tints these models to fit each biome. No external requests are
 needed at runtime. Bookie remains the existing locally modeled character.

@@ -8,14 +8,14 @@ renderer, cameras, progress estimator, and sink.
 From the repository root:
 
 ```sh
-npm install
+npm ci
 npm start
 ```
 
 Open http://127.0.0.1:3000. One process serves the app and `/api/runs/:id`.
 The demo starts at 500 rows/second. The Customize panel switches worlds,
 runners, cameras, road renewal, and automatic world changes.
-Set `worldSwitchIntervalSeconds` in `src/ExampleConfiguration.ts` to change the
+Set `worldSwitchIntervalSeconds` in `src/example_configuration.ts` to change the
 20-second world schedule. Cinematic mode waits for a shot boundary, fades out,
 changes world and camera together, then fades in.
 
@@ -38,26 +38,26 @@ Source: [Solana getTransactionCount](https://solana.com/docs/rpc/http/gettransac
 ```sh
 npm run typecheck --workspace examples
 npm run build --workspace examples
-npm run producer --workspace examples  # Choose Live input in the browser.
+npm run producer --workspace examples  # Choose Live input → Custom progress in the browser.
 ```
 
 `build` emits the browser app into `dist/`; the HTTP sink is a separate Node API
-when deploying that static build. `ExampleHTTPServer.ts` is the local development server.
+when deploying that static build. `example_http_server.ts` is the local development server.
 `rowrunner: file:..` links the library in this repository. In a separate app,
 replace it with the published Rowrunner version.
 
 ## Files
 
 - `src/main.ts`: application entrypoint.
-- `src/ExampleConfiguration.ts`: world/runner selection and camera settings.
-- `src/worlds/ExampleWorlds.ts` / `src/runners/ExampleRunners.ts`: ordinary arrays of content imports.
-- `src/worlds/<name>/<Name>World.ts`: world definitions.
-- `src/runners/<name>/<Name>Runner.ts`: runner definitions.
-- `src/ProgressDashboard.ts` and `src/ProgressHistory.ts`: HUD and live/demo controls.
-- `src/inputs/ProgressPollingInput.ts`: cancellable polling with a 2-second default.
-- `src/inputs/SolanaTransactionSource.ts`: server-side adapter for finalized network totals.
-- `ExampleHTTPServer.ts`: Vite and the progress API on one port.
-- `ExampleProgressProducer.ts`: sample HTTP producer.
+- `src/example_configuration.ts`: world/runner selection and camera settings.
+- `src/worlds/example_worlds.ts` / `src/runners/example_runners.ts`: ordinary arrays of content imports.
+- `src/worlds/<name>/<name>_world.ts`: world definitions.
+- `src/runners/<name>/<name>_runner.ts`: runner definitions.
+- `src/progress_dashboard.ts` and `src/progress_history.ts`: HUD and live/demo controls.
+- `src/inputs/progress_polling_input.ts`: cancellable polling with a 2-second default.
+- `src/inputs/solana_transaction_source.ts`: server-side adapter for finalized network totals.
+- `example_http_server.ts`: Vite and the progress API on one port.
+- `example_progress_producer.ts`: sample HTTP producer.
 
 The entrypoints and UI are strict TypeScript. Existing procedural geometry and
 GLSL strings remain in adjacent JavaScript helpers (`allowJs`); these can be
@@ -65,26 +65,26 @@ replaced with native Three.js models without changing the library.
 
 ## Add a runner
 
-Create `src/runners/my-runner/MyRunner.ts`:
+Create `src/runners/my-runner/my_runner.ts`:
 
 ```ts
-import { Mesh, SphereGeometry, MeshStandardMaterial } from 'three';
-import { defineRunner, disposeObject3D } from 'rowrunner/plugins';
+import {Mesh, SphereGeometry, MeshStandardMaterial} from 'three';
+import {defineRunner, disposeObject3D} from 'rowrunner/plugins';
 
-export default defineRunner({
+export const myRunner = defineRunner({
   id: 'my-runner',
   name: 'My runner',
   create() {
     const object = new Mesh(
       new SphereGeometry(1, 32, 24),
-      new MeshStandardMaterial({ color: 0x77ccff }),
+      new MeshStandardMaterial({color: 0x77ccff}),
     );
-    return { object, dispose: () => disposeObject3D(object) };
+    return {object, dispose: () => disposeObject3D(object)};
   },
 });
 ```
 
-Import it in `src/runners/ExampleRunners.ts` and add it to `runners`. Use `defineWorld()` and the
+Import `{myRunner}` in `src/runners/example_runners.ts` and add it to `runners`. Use `defineWorld()` and the
 `worlds` array for scenery. No library edits, central registration service,
 import maps, or separate plugin installation are needed.
 
