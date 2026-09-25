@@ -1,9 +1,10 @@
 # Private Cloud Run canary
 
-The manual **Ship** workflow deploys a private Cloud Run canary from the release
-tag. It also deploys the public GitHub Pages example, then waits for approval
-before publishing the packed npm candidate.
-The canary requires Google authentication; public traffic cannot invoke it.
+The private deployment repository runs the manual **Deploy Canary** workflow.
+It checks out an existing release tag from the public Rowrunner repository and
+deploys a Cloud Run canary. After QA, run **Ship** in the public repository with
+the same tag to deploy GitHub Pages and request npm release approval. Cloud Run
+requires Google authentication; public traffic cannot invoke the canary.
 
 The container serves the compiled example and its custom progress API. Every
 example build polls [PublicNode](https://solana.publicnode.com/) directly from
@@ -22,9 +23,9 @@ gcloud run services proxy "$GCP_CANARY_SERVICE" \
 ```
 
 Open http://127.0.0.1:8080. Check the live Solana rate after two samples and
-try the demo and custom-progress controls. The service URL shown by Ship
-returns an authorization error to unauthenticated browsers. The local proxy
-authenticates requests with your Google credentials.
+try the demo and custom-progress controls. The canary URL returns an
+authorization error to unauthenticated browsers. The local proxy authenticates
+requests with your Google credentials.
 
 The deployment uses scale-to-zero, a service and revision maximum of one
 instance, 1 CPU, 512 MiB memory, and ten concurrent requests. These settings
@@ -37,12 +38,9 @@ Spend cap enforcement can lag usage, so leave a margin below your actual limit.
 
 ## Release identity
 
-Ship uses keyless GitHub OIDC. Its provider should accept only this repository's
-`main` ref and `.github/workflows/ship.yml`. Set the repository secrets
-`GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_DEPLOY_SERVICE_ACCOUNT`,
-`GCP_PROJECT_ID`, `GCP_CANARY_REGION`, `GCP_CANARY_SERVICE`,
-`GCP_RUNTIME_SERVICE_ACCOUNT`, and `GCP_BUILD_SERVICE_ACCOUNT` before shipping.
-The deploy identity needs source deployment permission and access to the
-dedicated build and runtime identities; it should manage IAM only on the canary
-service. The runtime identity needs no project roles. No Google service account
-key is stored in GitHub.
+The private deployment workflow uses keyless GitHub OIDC and keeps its project
+configuration and logs in a private repository. Its provider accepts only that
+repository's `main` ref and canary workflow. The public Ship workflow does not
+receive GCP deployment secrets or emit the private service URL. The runtime
+identity needs no project roles; no Google service account key is stored in
+GitHub.

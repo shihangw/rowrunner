@@ -13,6 +13,10 @@ the project, such as its npm package name and public demo URL, are exceptions.
   appropriate secret store or local environment variables elsewhere. Put local
   configuration files on an ignore list and use clearly fictional placeholders
   in documentation. Never add a real value as a fallback default.
+- Treat workflow logs and deployment URLs in a public repository as public.
+  Secret masking is not guaranteed for transformed values or derived URLs. Run
+  deployments with private identifiers from private automation, not a public
+  repository workflow.
 - Before committing and pushing, inspect the staged diff and any new files for
   private identifiers and credentials. Check the proposed commit message and PR
   text as well. Do not print secret values while checking or setting them.
