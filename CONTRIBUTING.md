@@ -83,12 +83,25 @@ The version pull request updates `package.json`, `package-lock.json`, the releas
 manifest, and the changelog together. Review and merge it when ready; ordinary
 feature PRs do not edit version numbers.
 
-After a version pull request is merged, the release workflow runs the checks on
-that exact commit and publishes it to npm. The npm package owner must first add a
+Merging the version pull request creates a tagged GitHub release. To ship it,
+open **Actions → Ship → Run workflow** from `main` and enter that release tag,
+for example `v0.1.1`. The workflow checks the tagged source, packs the library,
+and deploys the example to the [canary site](https://shihangw.github.io/rowrunner/).
+The static preview shows simulated migration progress; live inputs need the Node
+server from the local example. The preview is replaced when a newer candidate is
+shipped.
+
+After checking the preview, approve the waiting **npm-release** deployment in
+GitHub Actions. The workflow verifies the saved tarball and publishes that exact
+candidate as npm `latest`. Rejecting the deployment leaves npm unchanged. The
+`npm-release` environment must require reviewer `shihangw`; the GitHub Pages site
+must use **GitHub Actions** as its build source.
+
+Before the first ship, add an npm
 [trusted publisher](https://docs.npmjs.com/trusted-publishers/) for the existing
 `@shihangw/rowrunner` package: GitHub user `shihangw`, repository `rowrunner`,
-workflow filename `release.yml`, and direct `npm publish` permission. Leave the
-optional environment field empty. This one-time npm setting enables short-lived
+workflow filename `ship.yml`, and direct `npm publish` permission. Leave its
+environment field set to `npm-release`. This one-time setting enables short-lived
 GitHub Actions authentication; no npm token is stored in the repository.
 
 ## Packaging

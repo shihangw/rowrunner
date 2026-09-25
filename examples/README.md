@@ -13,6 +13,8 @@ npm start
 ```
 
 Open http://127.0.0.1:3000. One process serves the app and `/api/runs/:id`.
+The [canary preview](https://shihangw.github.io/rowrunner/) is a static build for
+QA. It supports the simulated demo and has no live-input server.
 The demo starts at 500 rows/second. The Customize panel switches worlds,
 runners, cameras, road renewal, and automatic world changes.
 Set `worldSwitchIntervalSeconds` in `src/example_configuration.ts` to change the
