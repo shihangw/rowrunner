@@ -11,7 +11,7 @@ import type {
 export function disposeObject3D(object: Object3D): void {
   const resources = new Set<{dispose(): void}>();
   const texture = (value: unknown): value is Texture =>
-    !!value &&
+    value != null &&
     typeof value === 'object' &&
     'isTexture' in value &&
     value.isTexture === true;
@@ -22,19 +22,19 @@ export function disposeObject3D(object: Object3D): void {
       skeleton?: Skeleton;
       material?: Material | Material[];
     };
-    if (node.isInstancedMesh) {
+    if (node.isInstancedMesh === true) {
       resources.add(node as InstancedMesh);
     }
-    if (node.geometry) {
+    if (node.geometry != null) {
       resources.add(node.geometry);
     }
-    if (node.skeleton) {
+    if (node.skeleton != null) {
       resources.add(node.skeleton);
     }
     for (const material of Array.isArray(node.material)
       ? node.material
       : [node.material]) {
-      if (!material) {
+      if (material == null) {
         continue;
       }
       resources.add(material);
@@ -66,7 +66,7 @@ export function disposeObject3D(object: Object3D): void {
       errors.push(error);
     }
   }
-  if (errors.length) {
+  if (errors.length > 0) {
     throw new AggregateError(errors, 'Object disposal failed');
   }
 }

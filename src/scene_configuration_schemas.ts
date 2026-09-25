@@ -117,7 +117,9 @@ export const ProtagonistDefinitionSchema = z.object({
   roll: z.number().nonnegative().optional(),
 });
 const hasImplementation = (value: z.infer<typeof SceneDefinitionSchema>) =>
-  Boolean(value.preset || value.draw || value.create);
+  (value.preset != null && value.preset !== '') ||
+  value.draw != null ||
+  value.create != null;
 const implementationMessage = 'Plugin requires draw, create, or a preset';
 export const WorldPluginSchema = SceneDefinitionSchema.extend({
   kind: z.literal('world'),

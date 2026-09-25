@@ -116,10 +116,11 @@ export class CompletionCelebration {
     if (this.disposed) {
       return;
     }
-    const key = snapshot.runId
-      ? JSON.stringify([source, snapshot.runId])
-      : null;
-    if (snapshot.state !== 'completed' || !key) {
+    const key =
+      snapshot.runId != null && snapshot.runId !== ''
+        ? JSON.stringify([source, snapshot.runId])
+        : null;
+    if (snapshot.state !== 'completed' || key == null) {
       if (this.activeKey !== null) {
         this.reset();
       }
@@ -139,7 +140,7 @@ export class CompletionCelebration {
       this.detail.textContent = `${new Intl.NumberFormat('en-US').format(snapshot.completed)} ${snapshot.unit ?? 'rows'} completed`;
       // Four staggered bursts recycle a fixed pool rather than accumulating particles.
       this.particles = Array.from({length: 280}, (_, i) => {
-        const side = i % 2 ? 1 : -1;
+        const side = i % 2 !== 0 ? 1 : -1;
         return {
           side,
           delay: Math.floor(i / 70) * BURST_INTERVAL,
@@ -169,15 +170,19 @@ export class CompletionCelebration {
 
   draw(elapsed: number) {
     const ctx = this.context;
-    if (!ctx) {
+    if (ctx == null) {
       return;
     }
     const {width, height} = this.element.getBoundingClientRect();
-    if (!width || !height) {
+    if (width === 0 || height === 0) {
       return;
     }
+    const displayPixelRatio =
+      this.element.ownerDocument.defaultView!.devicePixelRatio;
     const ratio = Math.min(
-      this.element.ownerDocument.defaultView!.devicePixelRatio || 1,
+      displayPixelRatio === 0 || Number.isNaN(displayPixelRatio)
+        ? 1
+        : displayPixelRatio,
       2,
     );
     const w = Math.round(width * ratio);
@@ -212,7 +217,7 @@ export class CompletionCelebration {
       );
       ctx.restore();
     }
-    if (this.particles.length) {
+    if (this.particles.length > 0) {
       // Striped party cones just inside each edge, aimed toward the center.
       for (const side of [-1, 1]) {
         ctx.save();

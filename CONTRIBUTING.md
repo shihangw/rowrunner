@@ -41,7 +41,8 @@ TypeScript conventions and documents local adaptations, including descriptive
 snake_case filenames and Prettier-managed formatting. See the
 [architecture guide](agents/architecture.md) for library boundaries and ownership.
 
-ESLint owns language and correctness rules; Prettier owns layout. TypeScript is
+ESLint extends Google's `gts` preset and adds strict boolean conditions for
+TypeScript. Prettier owns layout. TypeScript is
 pinned to a version supported by TypeScript ESLint. Upgrade them together.
 Generated build output and vendored assets are excluded from lint and formatting.
 

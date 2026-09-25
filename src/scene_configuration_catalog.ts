@@ -45,7 +45,7 @@ function catalog<T extends SceneDefinition | ProtagonistDefinition, R>(
     baseDefinition: T | undefined,
   ) => R,
 ): readonly Readonly<PresetMetadata & R>[] {
-  if (!Array.isArray(entries) || !entries.length) {
+  if (!Array.isArray(entries) || entries.length === 0) {
     throw new TypeError(`${kind} must be a nonempty array`);
   }
   const registeredIdentifiers = new Set();
@@ -68,7 +68,11 @@ function catalog<T extends SceneDefinition | ProtagonistDefinition, R>(
       if (preset !== undefined) {
         validatePreset(preset, presets, kind);
       }
-      if (!preset && !definition.draw && !definition.create) {
+      if (
+        (preset == null || preset === '') &&
+        definition.draw == null &&
+        definition.create == null
+      ) {
         throw new TypeError(
           `${kind} ${definition.id} requires a preset, draw, or create function`,
         );
@@ -112,10 +116,10 @@ export function sceneCatalog(
         caption: merged.caption ?? '',
         create:
           definition.create ??
-          (definition.draw ? undefined : baseDefinition?.create),
+          (definition.draw != null ? undefined : baseDefinition?.create),
         draw:
           definition.draw ??
-          (definition.create ? undefined : baseDefinition?.draw),
+          (definition.create != null ? undefined : baseDefinition?.draw),
         sky: merged.sky,
         path: merged.path,
       };
@@ -141,10 +145,10 @@ export function protagonistCatalog(
         preset: baseDefinition?.preset ?? preset,
         draw:
           definition.draw ??
-          (definition.create ? undefined : baseDefinition?.draw),
+          (definition.create != null ? undefined : baseDefinition?.draw),
         create:
           definition.create ??
-          (definition.draw ? undefined : baseDefinition?.create),
+          (definition.draw != null ? undefined : baseDefinition?.create),
         forwardAxis: merged.forwardAxis ?? '-z',
         scale: merged.scale ?? 1,
         offset: merged.offset ?? Object.freeze([0, 2.2, -1] as const),

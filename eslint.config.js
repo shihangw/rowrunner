@@ -1,8 +1,7 @@
-import eslint from '@eslint/js';
+import googleTypeScript from 'gts';
 import {defineConfig, globalIgnores} from 'eslint/config';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
-import typescriptEslint from 'typescript-eslint';
 
 const unusedVariables = {
   argsIgnorePattern: '^_',
@@ -20,17 +19,37 @@ export default defineConfig([
   ]),
   {
     files: ['**/*.{js,mjs,ts}'],
-    extends: [eslint.configs.recommended],
+    extends: [googleTypeScript],
     languageOptions: {ecmaVersion: 'latest', sourceType: 'module'},
     linterOptions: {reportUnusedDisableDirectives: 'error'},
     rules: {'no-unused-vars': ['error', unusedVariables]},
   },
   {
     files: ['**/*.ts'],
-    extends: [typescriptEslint.configs.recommended],
+    languageOptions: {
+      parserOptions: {
+        project: false,
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
+      'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': ['error', unusedVariables],
       '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/strict-boolean-expressions': [
+        'error',
+        {
+          allowString: false,
+          allowNumber: false,
+          allowNullableObject: false,
+          allowNullableBoolean: false,
+          allowNullableString: false,
+          allowNullableNumber: false,
+          allowNullableEnum: false,
+          allowAny: false,
+        },
+      ],
     },
   },
   {

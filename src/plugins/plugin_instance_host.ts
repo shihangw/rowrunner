@@ -31,10 +31,11 @@ export class PluginInstanceHost {
       throw new Error('Plugin host is disposed');
     }
     let instance = this.instances.get(definition);
-    if (!instance) {
-      const source = definition.create
-        ? definition.create(Object.freeze({id: definition.id, kind}))
-        : {};
+    if (instance == null) {
+      const source =
+        definition.create != null
+          ? definition.create(Object.freeze({id: definition.id, kind}))
+          : {};
       if (typeof source !== 'object' || source === null || 'then' in source) {
         throw new TypeError(
           `Plugin ${definition.id}: create must return a synchronous instance`,
@@ -49,12 +50,12 @@ export class PluginInstanceHost {
           `Plugin ${definition.id}: object must be a THREE.Object3D`,
         );
       }
-      if (!draw && !source.object) {
+      if (draw == null && source.object == null) {
         throw new TypeError(
           `Plugin ${definition.id}: instance requires draw or object`,
         );
       }
-      if (source.object?.parent) {
+      if (source.object?.parent != null) {
         throw new TypeError(
           `Plugin ${definition.id}: object already belongs to a scene; create or clone one per instance`,
         );
@@ -72,7 +73,7 @@ export class PluginInstanceHost {
       this.active.delete(kind);
       previous?.source.object?.removeFromParent();
       previous?.source.onExit?.();
-      if (instance.source.object) {
+      if (instance.source.object != null) {
         this.roots[kind]?.add(instance.source.object);
       }
       instance.source.onEnter?.(frame);
@@ -104,7 +105,7 @@ export class PluginInstanceHost {
     }
     this.active.clear();
     this.instances.clear();
-    if (errors.length) {
+    if (errors.length > 0) {
       throw new AggregateError(errors, 'Plugin disposal failed');
     }
   }

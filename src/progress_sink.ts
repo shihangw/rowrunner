@@ -82,7 +82,7 @@ export class ProgressSink {
       label,
       unit,
     };
-    if (previous) {
+    if (previous != null) {
       if (timestamp < previous.timestamp) {
         return {accepted: false, reason: 'out-of-order'};
       }
@@ -99,19 +99,18 @@ export class ProgressSink {
         return {accepted: false, reason: 'terminal-run'};
       }
     }
-    const didCounterReset = previous && completed < previous.completed;
+    const didCounterReset = previous != null && completed < previous.completed;
     const didResume =
-      previous && previous.status !== 'running' && status === 'running';
+      previous != null && previous.status !== 'running' && status === 'running';
     const hasLongSampleGap =
-      previous && timestamp - previous.timestamp > this.staleAfterMs;
-    if (!previous || didCounterReset || didResume || hasLongSampleGap) {
+      previous != null && timestamp - previous.timestamp > this.staleAfterMs;
+    if (previous == null || didCounterReset || didResume || hasLongSampleGap) {
       this.samples = [];
       this.lastAdvance = timestamp;
-      this.resetCount = previous
-        ? this.resetCount + Number(didCounterReset)
-        : 0;
+      this.resetCount =
+        previous != null ? this.resetCount + Number(didCounterReset) : 0;
     }
-    if (previous && completed > previous.completed) {
+    if (previous != null && completed > previous.completed) {
       this.lastAdvance = timestamp;
     }
     this.samples.push(sample);
@@ -133,7 +132,7 @@ export class ProgressSink {
       accepted: true,
       reason: didCounterReset
         ? 'counter-reset'
-        : !previous
+        : previous == null
           ? 'new-run'
           : 'update',
       sample,
@@ -141,7 +140,7 @@ export class ProgressSink {
   }
 
   snapshot(currentTimestamp = Date.now()): ProgressSnapshot {
-    if (!this.latest) {
+    if (this.latest == null) {
       return {
         state: 'waiting',
         rate: null,

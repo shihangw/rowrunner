@@ -54,7 +54,7 @@ server.on('request', (req, res) => {
     );
     return;
   }
-  if (req.url?.startsWith('/api/')) {
+  if (req.url?.startsWith('/api/') === true) {
     api(req, res);
   } else {
     vite.middlewares(req, res);

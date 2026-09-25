@@ -18,7 +18,7 @@ export function startDashboard(
     id: string,
   ): T => {
     const node = document.getElementById(id);
-    if (!node) {
+    if (node == null) {
       throw new Error(`Missing element: ${id}`);
     }
     return node as T;
@@ -81,9 +81,10 @@ export function startDashboard(
     for (const button of document.querySelectorAll<HTMLElement>(
       '[data-scene], [data-mascot]',
     )) {
-      const selected = button.dataset.scene
-        ? button.dataset.scene === selectedWorldID
-        : button.dataset.mascot === selectedRunnerID;
+      const selected =
+        button.dataset.scene != null && button.dataset.scene !== ''
+          ? button.dataset.scene === selectedWorldID
+          : button.dataset.mascot === selectedRunnerID;
       button.classList.toggle('selected', selected);
       button.setAttribute('aria-pressed', String(selected));
     }
@@ -132,9 +133,8 @@ export function startDashboard(
     'aria-pressed',
     String(roadScene?.autoBiomes ?? false),
   );
-  elementWithID('auto-biomes').textContent = roadScene?.autoBiomes
-    ? 'Auto journey on'
-    : 'Hold this biome';
+  elementWithID('auto-biomes').textContent =
+    roadScene?.autoBiomes === true ? 'Auto journey on' : 'Hold this biome';
   elementWithID<HTMLSelectElement>('road-effect').value =
     roadScene?.roadEffect ?? sceneOptions.roadEffect ?? 'none';
   elementWithID<HTMLSelectElement>('road-effect').onchange = () =>
@@ -227,7 +227,7 @@ export function startDashboard(
   function setProgressInputMode(next: 'demo' | 'live') {
     stopProgressPolling?.();
     stopProgressPolling = undefined;
-    if (progressEventSource) {
+    if (progressEventSource != null) {
       progressEventSource.close();
       progressEventSource = null;
     }
@@ -395,7 +395,7 @@ export function startDashboard(
   function updateProgressDashboard(snapshot: ProgressSnapshot) {
     elementWithID('state-badge').textContent =
       progressStateLabels[snapshot.state];
-    if (roadScene && roadScene.scenePreset !== selectedWorldID) {
+    if (roadScene != null && roadScene.scenePreset !== selectedWorldID) {
       selectedWorldID = roadScene.scenePreset;
       updateContentSelection();
     }
@@ -436,25 +436,23 @@ export function startDashboard(
           ? 'Waiting for two samples'
           : snapshot.state === 'stalled'
             ? 'Fresh signal · count unchanged'
-            : snapshot.resetCount
+            : snapshot.resetCount > 0
               ? `Counter rebased · ${snapshot.resetCount} reset${snapshot.resetCount > 1 ? 's' : ''}`
               : '20s window · smoothed display';
     if (renderedChartVersion !== progressHistory.version) {
       const chart = progressHistory.plot();
       elementWithID('trend-line').setAttribute('d', chart.line);
       elementWithID('trend-area').setAttribute('d', chart.area);
-      elementWithID('trend-dot').toggleAttribute('hidden', !chart.last);
-      if (chart.last) {
+      elementWithID('trend-dot').toggleAttribute('hidden', chart.last == null);
+      if (chart.last != null) {
         elementWithID('trend-dot').setAttribute('cx', String(chart.last[0]));
         elementWithID('trend-dot').setAttribute('cy', String(chart.last[1]));
       }
       // Full counts keep nearby bounds distinguishable even for totals in the billions.
-      elementWithID('chart-max').textContent = chart.last
-        ? countFormatter.format(chart.max)
-        : '—';
-      elementWithID('chart-min').textContent = chart.last
-        ? countFormatter.format(chart.min)
-        : '—';
+      elementWithID('chart-max').textContent =
+        chart.last != null ? countFormatter.format(chart.max) : '—';
+      elementWithID('chart-min').textContent =
+        chart.last != null ? countFormatter.format(chart.min) : '—';
       const seconds = Math.floor(chart.duration / 1000);
       elementWithID('chart-duration').textContent =
         `−${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;

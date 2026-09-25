@@ -12,7 +12,7 @@ export function createPluginRegistry(plugins: readonly Plugin[] = []) {
     runner: new Map<string, Plugin>(),
   };
   for (const input of plugins as readonly Plugin[]) {
-    if (!input || !['world', 'runner'].includes(input.kind)) {
+    if (input == null || !['world', 'runner'].includes(input.kind)) {
       throw new TypeError(
         'Use defineWorld() or defineRunner() to declare a plugin',
       );
@@ -35,19 +35,22 @@ export function createPluginRegistry(plugins: readonly Plugin[] = []) {
         throw new RangeError(`Circular ${kind} preset: ${id}`);
       }
       const input = source.get(id);
-      if (!input) {
+      if (input == null) {
         throw new RangeError(`Unknown ${kind} preset: ${id}`);
       }
       visiting.add(id);
       const plugin =
         input.kind === 'world' ? defineWorld(input) : defineRunner(input);
       const base: Partial<WorldPlugin & Omit<RunnerPlugin, 'kind'>> =
-        plugin.preset ? (resolve(plugin.preset) as WorldPlugin) : {};
+        plugin.preset != null && plugin.preset !== ''
+          ? (resolve(plugin.preset) as WorldPlugin)
+          : {};
       const value = Object.freeze({
         ...base,
         ...plugin,
-        draw: plugin.draw ?? (plugin.create ? undefined : base.draw),
-        create: plugin.create ?? (plugin.draw ? undefined : base.create),
+        draw: plugin.draw ?? (plugin.create != null ? undefined : base.draw),
+        create:
+          plugin.create ?? (plugin.draw != null ? undefined : base.create),
         ...(plugin.kind === 'world'
           ? {palette: Object.freeze({...base.palette, ...plugin.palette})}
           : {}),

@@ -11,7 +11,7 @@ export function parseInput<S extends z.ZodType>(
     const message = result.error.issues
       .map(
         (issue) =>
-          `${name}${issue.path.length ? `.${issue.path.join('.')}` : ''}: ${issue.message}`,
+          `${name}${issue.path.length > 0 ? `.${issue.path.join('.')}` : ''}: ${issue.message}`,
       )
       .join('; ');
     throw new TypeError(message, {cause: result.error});
