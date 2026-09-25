@@ -1,4 +1,8 @@
 import {defineWorld} from '../shared/world_definition.js';
+const seaStormSoundtrackURL = new URL(
+  '../../assets/music/sea_storm.mp3',
+  import.meta.url,
+).href;
 import {drawStorm} from './sea_storm_geometry.js';
 
 export const seaStorm = defineWorld({
@@ -7,6 +11,52 @@ export const seaStorm = defineWorld({
   description:
     'Crossing ocean swells, broken whitecaps, wind-driven rain, and distant lightning around a luminous causeway.',
   caption: 'Through the squall.',
+  music: {
+    src: seaStormSoundtrackURL,
+    tempo: 88,
+    wave: 'triangle',
+    melody: [
+      67,
+      null,
+      null,
+      70,
+      74,
+      null,
+      70,
+      null,
+      65,
+      null,
+      69,
+      null,
+      72,
+      null,
+      69,
+      null,
+      67,
+      null,
+      70,
+      null,
+      75,
+      74,
+      70,
+      null,
+      65,
+      null,
+      69,
+      72,
+      74,
+      null,
+      69,
+      null,
+    ],
+    bass: [43, 41, 38, 41],
+    chords: [
+      [55, 58, 62],
+      [53, 57, 60],
+      [50, 53, 57],
+      [53, 57, 60],
+    ],
+  },
   palette: {
     sky: [0.018, 0.03, 0.047],
     horizon: [0.16, 0.22, 0.26],

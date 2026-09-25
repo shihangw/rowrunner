@@ -1,4 +1,4 @@
-# Third-party scenery
+# Third-party assets
 
 Selected 3D assets from **Space Kit**, created by **Kenney**, are used by the example under
 **Creative Commons Zero (CC0)**. They can be redistributed with the example.
@@ -17,3 +17,22 @@ Original OBJ/MTL source files and the unmodified license are in `src/assets/`.
 and embeds a subset in `src/assets/space-kit.js`. The renderer scales, rotates,
 and sometimes tints these models to fit each biome. No external requests are
 needed at runtime. Bookie remains the existing locally modeled character.
+
+## Music
+
+The example includes seven CC0 recordings downloaded on 2026-09-25, normalized
+for comparable loudness, and transcoded to 128 kbps MP3. They are bundled
+locally; no music service is called when the example runs.
+
+| World          | Recording                 | Creator   | Source                                                                |
+| -------------- | ------------------------- | --------- | --------------------------------------------------------------------- |
+| Neon Meridian  | A Flawless Getaway (loop) | vitalezzz | [OpenGameArt](https://opengameart.org/content/a-flawless-getaway)     |
+| Cloud Harbor   | Airy                      | SRG774    | [OpenGameArt](https://opengameart.org/content/dark-sci-fi-audio-pack) |
+| Ember Reach    | Urgent                    | SRG774    | [OpenGameArt](https://opengameart.org/content/dark-sci-fi-audio-pack) |
+| Binary Eclipse | Subspace (loop)           | vitalezzz | [OpenGameArt](https://opengameart.org/content/subspace)               |
+| Ion Glacier    | Sector                    | SRG774    | [OpenGameArt](https://opengameart.org/content/dark-sci-fi-audio-pack) |
+| Matrix         | Pulse                     | SRG774    | [OpenGameArt](https://opengameart.org/content/dark-sci-fi-audio-pack) |
+| Sea Storm      | Transmission              | SRG774    | [OpenGameArt](https://opengameart.org/content/dark-sci-fi-audio-pack) |
+
+Each source page marks the work CC0. The license dedication is at
+https://creativecommons.org/publicdomain/zero/1.0/.

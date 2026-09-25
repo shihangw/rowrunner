@@ -197,10 +197,10 @@ test('automatic biomes fade through all seven worlds without resetting distance'
   for (const next of [
     'clouds',
     'ember',
+    'black-holes',
     'glacier',
     'matrix',
     'sea-storm',
-    'black-holes',
     'midnight',
   ]) {
     scene.distance += 2200;

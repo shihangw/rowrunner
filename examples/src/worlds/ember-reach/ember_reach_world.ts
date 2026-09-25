@@ -1,4 +1,8 @@
 import {defineWorld} from '../shared/world_definition.js';
+const emberReachSoundtrackURL = new URL(
+  '../../assets/music/ember_reach.mp3',
+  import.meta.url,
+).href;
 import {drawTerrain} from '../shared/terrain_geometry.js';
 
 export const emberReach = defineWorld({
@@ -7,6 +11,52 @@ export const emberReach = defineWorld({
   description:
     'Low rust-colored foothills, layered volcanic mountains, and glowing crystal fields on a red planet.',
   caption: 'Through the heart of it.',
+  music: {
+    src: emberReachSoundtrackURL,
+    tempo: 104,
+    wave: 'triangle',
+    melody: [
+      69,
+      null,
+      72,
+      76,
+      72,
+      null,
+      69,
+      null,
+      67,
+      null,
+      71,
+      74,
+      71,
+      null,
+      67,
+      null,
+      69,
+      72,
+      76,
+      null,
+      81,
+      76,
+      72,
+      null,
+      67,
+      71,
+      74,
+      null,
+      79,
+      74,
+      71,
+      null,
+    ],
+    bass: [45, 43, 41, 40],
+    chords: [
+      [57, 60, 64],
+      [55, 59, 62],
+      [53, 57, 60],
+      [52, 56, 59],
+    ],
+  },
   palette: {
     sky: [0.1, 0.018, 0.036],
     horizon: [0.37, 0.12, 0.085],

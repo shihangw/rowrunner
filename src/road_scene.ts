@@ -25,6 +25,7 @@ import {validatePreset} from './preset_validation.js';
 import {PluginInstanceHost} from './plugins/plugin_instance_host.js';
 import {createPluginRegistry} from './plugins/plugin_registry.js';
 import {SceneRenderer} from './scene_renderer.js';
+import {WorldMusicPlayer} from './world_music_player.js';
 import {drawRoad, roadSurface, validateRoadEffect} from './road_geometry.js';
 import {
   cameraPose,
@@ -136,6 +137,7 @@ export class RoadScene {
   private disposed = false;
   private wasCompleted = false;
   private pluginHost?: PluginInstanceHost;
+  private musicPlayer?: WorldMusicPlayer;
   private transform: ((point: Vec3) => Vec3) | null = null;
   private worldTransform: ((point: Vec3) => Vec3) | null = null;
   private vertices: number[] = [];
@@ -307,9 +309,41 @@ export class RoadScene {
   /** Change presentation without resetting distance, animation time, or telemetry. */
   setScene(id: string) {
     this.scenePreset = validatePreset(id, this.scenes, 'scene');
+    this.musicPlayer?.setWorld(this.scenePreset);
     this.worldElapsedSeconds = 0;
     this.biomeTransition = null;
     this.pathEntry = null;
+  }
+  /** Enable music from a user gesture; sound is off until explicitly requested. */
+  async setMusicEnabled(enabled: boolean): Promise<void> {
+    if (typeof enabled !== 'boolean') {
+      throw new TypeError('enabled must be a boolean');
+    }
+    if (this.disposed) {
+      throw new Error('Cannot change music on a disposed scene');
+    }
+    if (!enabled) {
+      this.musicPlayer?.dispose();
+      this.musicPlayer = undefined;
+      return;
+    }
+    if (this.musicPlayer != null) {
+      return;
+    }
+    const player = new WorldMusicPlayer(this.scenes);
+    this.musicPlayer = player;
+    try {
+      await player.start(this.scenePreset);
+    } catch (error) {
+      player.dispose();
+      if (this.musicPlayer === player) {
+        this.musicPlayer = undefined;
+      }
+      throw error;
+    }
+  }
+  get musicEnabled(): boolean {
+    return this.musicPlayer != null;
   }
   setCamera(mode: CameraMode) {
     validateCamera(mode);
@@ -729,6 +763,7 @@ export class RoadScene {
       fade = Math.sin(raw * Math.PI) ** 4;
       if (raw >= 0.5 && this.scenePreset !== to) {
         this.scenePreset = to;
+        this.musicPlayer?.setWorld(to);
         this.worldElapsedSeconds = 0;
         fade = 1;
       }
@@ -1174,6 +1209,8 @@ export class RoadScene {
       return;
     }
     this.disposed = true;
+    this.musicPlayer?.dispose();
+    this.musicPlayer = undefined;
     this.canvas.removeEventListener('webglcontextlost', this.onLost);
     this.canvas.removeEventListener('webglcontextrestored', this.onRestored);
     try {

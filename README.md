@@ -21,8 +21,8 @@ time something to look at—and makes changes in pace visible at a glance.
 - **Bring a live counter to life.** Show ongoing activity without a fixed target.
   The example can follow public Solana transaction totals, polling every 2 seconds.
 - **Make it yours.** Choose a world and protagonist, use your own Three.js models,
-  and customize the completion message. The road can light up behind the runner
-  as work gets done.
+  give each world its own music, and customize the completion message. The road
+  can light up behind the runner as work gets done.
 
 Send cumulative counts and timestamps; Rowrunner estimates throughput and smooths
 movement between updates. It handles uneven reporting, counter resets, pauses,
@@ -120,4 +120,4 @@ plugin API.
 - [Worlds, runners, cameras, and Three.js models](https://github.com/shihangw/rowrunner/blob/main/docs/scenes.md)
 - [Contributing and development](https://github.com/shihangw/rowrunner/blob/main/CONTRIBUTING.md)
 
-MIT licensed. Example scenery includes [Kenney assets under CC0](https://github.com/shihangw/rowrunner/blob/main/examples/THIRD_PARTY.md).
+MIT licensed. Example scenery and music include [CC0 assets](https://github.com/shihangw/rowrunner/blob/main/examples/THIRD_PARTY.md).
