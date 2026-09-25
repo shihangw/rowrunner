@@ -174,7 +174,7 @@ export function startDashboard(
   let inputMode = 'demo';
   let progressEventSource: EventSource | null = null;
   let stopProgressPolling: (() => void) | undefined;
-  let demoProcessingRate = 500;
+  let demoProcessingRate = 100;
   let demoCompletedCount = 0;
   let isDemoPaused = false;
   let isSignalLost = false;
