@@ -1,4 +1,4 @@
-import type {ResolvedScene, WorldMusic} from './scene_types.js';
+import type {WorldMusic} from './world_music_types.ts';
 
 interface PlayingMusic {
   bus: GainNode;
@@ -33,7 +33,7 @@ const midiFrequency = (note: number) => 440 * 2 ** ((note - 69) / 12);
 export class WorldMusicPlayer {
   private readonly context: AudioContext;
   private readonly output: GainNode;
-  private readonly scores: readonly ResolvedScene[];
+  private readonly scores: Readonly<Record<string, WorldMusic>>;
   private playing: (PlayingScore | PlayingRecording)[] = [];
   private readonly audioBuffers = new Map<string, Promise<AudioBuffer>>();
   private readonly downloads = new Map<string, AbortController>();
@@ -44,7 +44,7 @@ export class WorldMusicPlayer {
   private desiredWorldID = '';
   private worldRevision = 0;
 
-  constructor(scores: readonly ResolvedScene[]) {
+  constructor(scores: Readonly<Record<string, WorldMusic>>) {
     if (typeof AudioContext === 'undefined') {
       throw new Error('Web Audio is unavailable in this browser');
     }
@@ -85,7 +85,7 @@ export class WorldMusicPlayer {
   }
 
   private playWorld(worldID: string): void {
-    const score = this.scores.find((world) => world.id === worldID)?.music;
+    const score = this.scores[worldID];
     const now = this.context.currentTime;
     for (const playing of this.playing) {
       if (playing.kind === 'recording' && playing.retireAt === Infinity) {

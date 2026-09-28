@@ -42,6 +42,12 @@ try {
     ),
   );
   const packedPaths = new Set(packedPackage.files.map((file) => file.path));
+  assert.ok(
+    ![...packedPaths].some((path) =>
+      path.startsWith('dist/world_music_player.'),
+    ),
+    'Music player must remain in the example, outside the npm package',
+  );
   for (const entrypoint of Object.values(packageManifest.exports)) {
     for (const target of [entrypoint.import, entrypoint.types]) {
       assert.ok(

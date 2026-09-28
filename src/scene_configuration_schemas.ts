@@ -18,6 +18,35 @@ export const CameraModeSchema = z.enum([
 ]);
 export const RoadEffectSchema = z.enum(['none', 'renewal']);
 export const SpeedScaleSchema = z.enum(['logarithmic', 'linear']);
+/** Discrete scene changes; rendering frames are intentionally not events. */
+export const SceneEventSchema = z.discriminatedUnion('type', [
+  z.strictObject({
+    type: z.literal('world-changed'),
+    previousWorldId: z.string(),
+    worldId: z.string(),
+    reason: z.enum(['manual', 'scheduled']),
+  }),
+  z.strictObject({
+    type: z.literal('runner-changed'),
+    previousRunnerId: z.string(),
+    runnerId: z.string(),
+  }),
+  z.strictObject({
+    type: z.literal('camera-mode-changed'),
+    previousMode: CameraModeSchema,
+    mode: CameraModeSchema,
+  }),
+  z.strictObject({
+    type: z.literal('camera-shot-changed'),
+    previousShot: z.string(),
+    shot: z.string(),
+    mode: CameraModeSchema,
+  }),
+  z.strictObject({
+    type: z.literal('completion-changed'),
+    completed: z.boolean(),
+  }),
+]);
 export const VisualRateMultiplierSchema = z.number().finite().positive();
 export const Vec3Schema = z
   .tuple([z.number(), z.number(), z.number()])
@@ -85,23 +114,6 @@ export const WorldPathSchema = z
     fogDistance: z.number().nonnegative().optional(),
   })
   .readonly();
-/** A four-bar, looping score. MIDI notes use 60 for middle C; null is a rest. */
-export const WorldMusicSchema = z
-  .object({
-    tempo: z.number().finite().min(40).max(200),
-    melody: z.array(z.number().int().min(24).max(108).nullable()).length(32),
-    bass: z.array(z.number().int().min(24).max(84)).length(4),
-    chords: z
-      .array(z.array(z.number().int().min(36).max(96)).length(3))
-      .length(4),
-    wave: z.enum(['sine', 'triangle', 'sawtooth', 'square']).optional(),
-    instrument: z.enum(['synth', 'organ']).optional(),
-    echo: z.boolean().optional(),
-    /** Optional recorded loop; the score plays while it loads or if it fails. */
-    src: z.string().min(1).optional(),
-    volume: z.number().finite().min(0).max(1).optional(),
-  })
-  .readonly();
 const definition = {
   id: DefinitionIdSchema,
   name: z.string().optional(),
@@ -118,8 +130,6 @@ export const SceneDefinitionSchema = z.object({
   palette: PaletteOverridesSchema.optional(),
   sky: SkyDefinitionSchema.optional(),
   path: WorldPathSchema.optional(),
-  /** Optional original score, played only after the viewer enables audio. */
-  music: WorldMusicSchema.nullable().optional(),
   /** Show the built-in road and contact shadow. Default true. */
   road: z.boolean().optional(),
 });
@@ -200,4 +210,9 @@ export const SceneOptionsSchema = z.object({
   roadEffect: RoadEffectSchema.optional(),
   speedScale: SpeedScaleSchema.optional(),
   visualRateMultiplier: VisualRateMultiplierSchema.optional(),
+  /** Called synchronously only when a discrete scene state changes. */
+  onEvent:
+    callback<(event: z.infer<typeof SceneEventSchema>) => void>(
+      'onEvent',
+    ).optional(),
 });

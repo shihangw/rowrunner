@@ -122,7 +122,6 @@ export function sceneCatalog(
           (definition.create != null ? undefined : baseDefinition?.draw),
         sky: merged.sky,
         path: merged.path,
-        music: merged.music,
       };
     },
   );

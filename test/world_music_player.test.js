@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {WorldMusicPlayer} from '../src/world_music_player.js';
-import {sceneCatalog} from '../src/scene_configuration_catalog.js';
+import {WorldMusicPlayer} from '../examples/src/world_music_player.ts';
+import {worldMusicByID} from '../examples/src/world_music_configuration.ts';
 import {worlds} from '../examples/src/worlds/example_worlds.ts';
 
 class FakeAudioParameter {
@@ -71,7 +71,7 @@ class FakeAudioContext {
 }
 
 test('each example world owns a distinct, valid music score', () => {
-  const scores = sceneCatalog(worlds).map((world) => world.music);
+  const scores = worlds.map((world) => worldMusicByID[world.id]);
   assert.equal(scores.length, 7);
   assert.ok(scores.every((score) => score != null));
   assert.equal(new Set(scores.map((score) => score.tempo)).size, 7);
@@ -88,12 +88,8 @@ test('recorded loops replace the score after loading and stop on world exit', as
     },
   });
   try {
-    const score = {...worlds[0].music, src: '/music/neon.mp3'};
-    const scenes = sceneCatalog([
-      {...worlds[0], music: score},
-      {id: 'silent', draw() {}, music: null},
-    ]);
-    const player = new WorldMusicPlayer(scenes);
+    const score = {...worldMusicByID[worlds[0].id], src: '/music/neon.mp3'};
+    const player = new WorldMusicPlayer({[worlds[0].id]: score});
     await player.start(worlds[0].id);
     await new Promise((resolve) => setImmediate(resolve));
     const recording = player.playing.find(
@@ -125,8 +121,7 @@ test('music schedules notes, crossfades worlds, and releases audio resources', a
   const previousAudioContext = globalThis.AudioContext;
   globalThis.AudioContext = FakeAudioContext;
   try {
-    const scores = sceneCatalog(worlds);
-    const player = new WorldMusicPlayer(scores);
+    const player = new WorldMusicPlayer(worldMusicByID);
     await player.start('midnight');
     const context = FakeAudioContext.latest;
     assert.ok(context.oscillators.length > 0);

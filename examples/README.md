@@ -22,7 +22,8 @@ runners, cameras, road renewal, and automatic world changes.
 Each world has a recorded CC0 music loop and a procedural fallback score. Choose
 **Music on** in Customize to hear it; music follows world changes and starts
 only after that click. The audio files and credits are listed in
-[THIRD_PARTY.md](THIRD_PARTY.md).
+[THIRD_PARTY.md](THIRD_PARTY.md). The music player and scores are example-owned;
+the example listens to Rowrunner's `world-changed` callback to switch tracks.
 Set `worldSwitchIntervalSeconds` in `src/example_configuration.ts` to change the
 20-second world schedule. Cinematic mode waits for a shot boundary, fades out,
 changes world and camera together, then fades in.
