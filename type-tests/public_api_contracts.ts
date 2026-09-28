@@ -6,6 +6,7 @@ import {
 import {
   RoadScene,
   type SceneOptions,
+  type SceneEvent,
   type Vec3,
 } from '@shihangw/rowrunner/scene';
 import {
@@ -70,6 +71,15 @@ const options: SceneOptions = {
   worlds: [world],
   runners: [runner],
   visualRateMultiplier: 12.5,
+  onEvent(event: SceneEvent) {
+    if (event.type === 'world-changed') {
+      event.worldId.toUpperCase();
+      event.reason satisfies 'manual' | 'scheduled';
+    }
+    if (event.type === 'completion-changed') {
+      event.completed.valueOf();
+    }
+  },
 };
 const parsedOptions: SceneOptions = SceneOptionsSchema.parse(options);
 const parsedWorld: z.infer<typeof WorldPluginSchema> = world;
@@ -88,6 +98,8 @@ sink.push({...sample, completed: '500'});
 defineWorld({id: 'bad', draw() {}, palette: {accent: [1, 0]}});
 // @ts-expect-error unsupported camera mode
 const badOptions: SceneOptions = {camera: 'top-down'};
+// @ts-expect-error music belongs to the application, not the world definition
+defineWorld({id: 'music', draw() {}, music: {tempo: 96}});
 // @ts-expect-error factories must return synchronously
 defineRunner({id: 'async', create: async () => ({object: new Group()})});
 void [drawRoad, createProgressServer, mount, badOptions];

@@ -7,8 +7,8 @@ import {
   PushResultSchema,
   SinkOptionsSchema,
   SceneOptionsSchema,
+  SceneEventSchema,
   WorldPluginSchema,
-  WorldMusicSchema,
 } from '@shihangw/rowrunner/schemas';
 import {ProgressSink} from '@shihangw/rowrunner';
 import {defineWorld, defineRunner} from '@shihangw/rowrunner/plugins';
@@ -186,33 +186,21 @@ test('explicit undefined overrides still inherit preset values', () => {
   assert.deepEqual(child.offset, [1, 3, 5]);
 });
 
-test('world music is validated and follows inherited world definitions', () => {
-  const music = {
-    tempo: 96,
-    melody: Array.from({length: 32}, (_, index) =>
-      index % 2 === 0 ? 72 : null,
-    ),
-    bass: [48, 45, 50, 48],
-    chords: [
-      [60, 64, 67],
-      [57, 60, 64],
-      [62, 65, 69],
-      [60, 64, 67],
-    ],
-  };
-  const base = defineWorld({id: 'base', draw() {}, music});
-  const [inherited, silent] = sceneCatalog(
-    [
-      {id: 'inherited', preset: 'base'},
-      {id: 'silent', preset: 'base', music: null},
-    ],
-    [base],
+test('scene event callback is validated without wrapping and events have typed payloads', () => {
+  const onEvent = () => {};
+  assert.equal(SceneOptionsSchema.parse({onEvent}).onEvent, onEvent);
+  assert.equal(SceneOptionsSchema.safeParse({onEvent: true}).success, false);
+  assert.ok(
+    SceneEventSchema.safeParse({
+      type: 'world-changed',
+      previousWorldId: 'midnight',
+      worldId: 'clouds',
+      reason: 'scheduled',
+    }).success,
   );
-  assert.deepEqual(inherited.music, music);
-  assert.equal(silent.music, null);
-  assert.equal(WorldMusicSchema.safeParse({...music, tempo: 0}).success, false);
   assert.equal(
-    WorldMusicSchema.safeParse({...music, melody: [72]}).success,
+    SceneEventSchema.safeParse({type: 'world-changed', worldId: 'clouds'})
+      .success,
     false,
   );
 });

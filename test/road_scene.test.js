@@ -60,6 +60,134 @@ test('changing presets preserves travel and invalid selections leave the current
   assert.equal(scene.mascotPreset, 'bookie');
 });
 
+test('scene events fire once for manual and scheduled changes', () => {
+  const events = [];
+  const scene = Object.assign(Object.create(RoadScene.prototype), {
+    scenes: sceneCatalog(),
+    protagonists: protagonistCatalog(),
+    scenePreset: 'midnight',
+    mascotPreset: 'bookie',
+    cameraMode: 'chase',
+    onEvent: (event) => events.push(event),
+    time: 0,
+    autoBiomes: true,
+    worldElapsedSeconds: 0,
+    worldSwitchIntervalSeconds: 20,
+    biomeTransition: null,
+  });
+  scene.setScene('clouds');
+  scene.setScene('clouds');
+  scene.setRunner('courier');
+  scene.setCamera('side');
+  scene.worldElapsedSeconds = 20;
+  scene.updateBiome();
+  scene.time = 3;
+  scene.updateBiome();
+  scene.updateBiome();
+  assert.deepEqual(events, [
+    {
+      type: 'world-changed',
+      previousWorldId: 'midnight',
+      worldId: 'clouds',
+      reason: 'manual',
+    },
+    {type: 'runner-changed', previousRunnerId: 'bookie', runnerId: 'courier'},
+    {type: 'camera-mode-changed', previousMode: 'chase', mode: 'side'},
+    {
+      type: 'world-changed',
+      previousWorldId: 'clouds',
+      worldId: 'ember',
+      reason: 'scheduled',
+    },
+  ]);
+});
+
+test('completion events fire on edges, not every render frame', () => {
+  const events = [];
+  const scene = Object.assign(Object.create(RoadScene.prototype), {
+    scenes: sceneCatalog(),
+    protagonists: protagonistCatalog(),
+    scenePreset: 'midnight',
+    cameraMode: 'chase',
+    reducedMotion: {matches: false},
+    canvas: {getBoundingClientRect: () => ({width: 0, height: 0})},
+    onEvent: (event) => events.push(event),
+    speedScale: 'logarithmic',
+    visualRateMultiplier: 1,
+    time: 0,
+    cameraTime: 0,
+    distance: 0,
+    autoBiomes: false,
+    biomeTransition: null,
+    worldElapsedSeconds: 0,
+    wasCompleted: false,
+  });
+  const previousDevicePixelRatio = globalThis.devicePixelRatio;
+  globalThis.devicePixelRatio = 1;
+  try {
+    scene.render(100, 1 / 60, {completed: true});
+    scene.render(100, 1 / 60, {completed: true});
+    scene.render(100, 1 / 60, {completed: false});
+  } finally {
+    globalThis.devicePixelRatio = previousDevicePixelRatio;
+  }
+  assert.deepEqual(events, [
+    {type: 'completion-changed', completed: true},
+    {type: 'completion-changed', completed: false},
+  ]);
+});
+
+test('camera shot events follow the displayed composition', () => {
+  const events = [];
+  const scene = Object.assign(Object.create(RoadScene.prototype), {
+    scenes: sceneCatalog([{id: 'empty', road: false, draw() {}}]),
+    protagonists: protagonistCatalog([{id: 'probe', draw() {}}]),
+    scenePreset: 'empty',
+    mascotPreset: 'probe',
+    cameraMode: 'chase',
+    cameraShot: 'Before render',
+    onEvent: (event) => events.push(event),
+    reducedMotion: {matches: false},
+    canvas: {getBoundingClientRect: () => ({width: 800, height: 450})},
+    sceneRenderer: {begin() {}, draw() {}},
+    geometry: {},
+    speedScale: 'logarithmic',
+    visualRateMultiplier: 1,
+    time: 0,
+    cameraTime: 0,
+    distance: 0,
+    autoBiomes: false,
+    biomeTransition: null,
+    worldElapsedSeconds: 0,
+  });
+  const previousDevicePixelRatio = globalThis.devicePixelRatio;
+  globalThis.devicePixelRatio = 1;
+  try {
+    scene.render(100, 1 / 60);
+    scene.render(100, 1 / 60);
+    scene.render(100, 1 / 60, {completed: true});
+  } finally {
+    globalThis.devicePixelRatio = previousDevicePixelRatio;
+  }
+  assert.deepEqual(
+    events.filter((event) => event.type === 'camera-shot-changed'),
+    [
+      {
+        type: 'camera-shot-changed',
+        previousShot: 'Before render',
+        shot: 'Chase',
+        mode: 'chase',
+      },
+      {
+        type: 'camera-shot-changed',
+        previousShot: 'Chase',
+        shot: 'Approach',
+        mode: 'approach',
+      },
+    ],
+  );
+});
+
 test('mascot meshes contain only finite vertices and colors, including at rest and at high speed', () => {
   for (const preset of MASCOT_PRESETS) {
     for (const rate of [0, 500, 1_000_000]) {

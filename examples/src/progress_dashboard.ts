@@ -14,6 +14,8 @@ import type {ProgressSample, ProgressSnapshot} from '@shihangw/rowrunner';
 import {ProgressHistory} from './progress_history.ts';
 import {startProgressPolling} from './inputs/progress_polling_input.ts';
 import {readSolanaTransactionProgress} from './inputs/solana_transaction_source.ts';
+import {WorldMusicPlayer} from './world_music_player.ts';
+import {worldMusicByID} from './world_music_configuration.ts';
 
 export function startDashboard(
   sceneOptions: SceneOptions,
@@ -45,13 +47,19 @@ export function startDashboard(
     progressHistory.add(progressSink.push(sample, now));
   }
   let roadScene: RoadScene | undefined;
+  let worldMusicPlayer: WorldMusicPlayer | undefined;
   let selectedWorldID: string;
   let selectedRunnerID: string;
   try {
-    roadScene = new RoadScene(
-      elementWithID<HTMLCanvasElement>('road'),
-      sceneOptions,
-    );
+    roadScene = new RoadScene(elementWithID<HTMLCanvasElement>('road'), {
+      ...sceneOptions,
+      onEvent(event) {
+        if (event.type === 'world-changed') {
+          worldMusicPlayer?.setWorld(event.worldId);
+        }
+        sceneOptions.onEvent?.(event);
+      },
+    });
   } catch (error) {
     elementWithID('scene-error').hidden = false;
     elementWithID('scene-error').textContent = String(error);
@@ -174,16 +182,29 @@ export function startDashboard(
     if (roadScene == null) {
       return;
     }
-    const enabled = !roadScene.musicEnabled;
     try {
-      await roadScene.setMusicEnabled(enabled);
+      if (worldMusicPlayer != null) {
+        worldMusicPlayer.dispose();
+        worldMusicPlayer = undefined;
+      } else {
+        const player = new WorldMusicPlayer(worldMusicByID);
+        worldMusicPlayer = player;
+        try {
+          await player.start(roadScene.scenePreset);
+        } catch (error) {
+          player.dispose();
+          if (worldMusicPlayer === player) {
+            worldMusicPlayer = undefined;
+          }
+          throw error;
+        }
+      }
       elementWithID('music-toggle').setAttribute(
         'aria-pressed',
-        String(roadScene.musicEnabled),
+        String(worldMusicPlayer != null),
       );
-      elementWithID('music-toggle').textContent = roadScene.musicEnabled
-        ? 'Music on'
-        : 'Music off';
+      elementWithID('music-toggle').textContent =
+        worldMusicPlayer != null ? 'Music on' : 'Music off';
     } catch (error) {
       elementWithID('announcement').textContent =
         `Could not start music: ${String(error)}`;
@@ -561,7 +582,8 @@ export function startDashboard(
   window.addEventListener('pagehide', () => {
     progressEventSource?.close();
     stopProgressPolling?.();
-    void roadScene?.setMusicEnabled(false);
+    worldMusicPlayer?.dispose();
+    worldMusicPlayer = undefined;
     elementWithID('music-toggle').setAttribute('aria-pressed', 'false');
     elementWithID('music-toggle').textContent = 'Music off';
   });

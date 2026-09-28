@@ -49,46 +49,37 @@ cleanup hook fails. Preload external assets before creating the visualization.
 Worlds accept partial RGB `palette` overrides, `road: false` to hide the road,
 a `sky` fragment shader with per-frame uniforms, and an optional `path` adapter
 for curved coordinate systems. The default sky is a simple palette gradient.
-Worlds may also supply a `music` score. A score has a tempo in beats per minute,
-32 eighth-note `melody` positions (MIDI pitches or `null` rests), four `bass`
-pitches, and four three-note `chords`. Optional `wave` selects the lead's
-oscillator shape, `instrument: 'organ'` gives the lead and chords a sustained
-pipe-organ voice, `echo: true` adds a spacious delay, and `volume` sets that
-world's mix level. The score loops
-while its world is active; manual and scheduled world changes crossfade the
-music. Worlds without a score are silent; `music: null` silences an inherited
-score. Set `src` to a same-origin audio file URL to play a recorded loop for
-that world. The procedural score plays until the file is decoded and remains
-the fallback if it cannot load. For a Vite app, use a static
-`new URL('./music.mp3', import.meta.url).href` as `src`; Vite includes the file
-in the build. Call
-`await scene.setMusicEnabled(true)` from a click or other user gesture to start
-audio; it is off by default. Use `scene.setMusicEnabled(false)` to stop it, and
-`scene.musicEnabled` to read the current setting. `scene.dispose()` closes its
-audio context along with its rendering resources. The example's seven worlds
-bundle CC0 recorded tracks with original procedural scores as fallbacks, and
-its Customize panel has a music toggle.
+
+`onEvent` receives discrete state changes synchronously. Use it to coordinate
+app-owned music, analytics, or UI without putting those concerns in a world
+definition. No event is emitted for the initial selection or for a repeated
+selection; read `scene.world` and `scene.runner` after construction to initialize
+your app. The event types are `world-changed` (with `manual` or `scheduled`
+reason), `runner-changed`, `camera-mode-changed`, `camera-shot-changed`, and
+`completion-changed`. `SceneEventSchema` and the `SceneEvent` type are exported
+from the package.
 
 ```ts
-const myWorld = defineWorld({
-  id: 'my-world',
-  draw(geometry, frame) {
-    // Draw scenery here.
-  },
-  music: {
-    tempo: 96,
-    melody: Array.from({length: 32}, (_, step) => (step % 4 === 0 ? 72 : null)),
-    bass: [48, 45, 50, 48],
-    chords: [
-      [60, 64, 67],
-      [57, 60, 64],
-      [62, 65, 69],
-      [60, 64, 67],
-    ],
-    wave: 'sine',
+const scene = new RoadScene(canvas, {
+  worlds: [myWorld],
+  runners: [myRunner],
+  onEvent(event) {
+    if (event.type === 'world-changed') {
+      musicPlayer.setWorld(event.worldId);
+    }
+    if (event.type === 'completion-changed' && event.completed) {
+      showCompletionMessage();
+    }
   },
 });
+musicPlayer.setWorld(scene.world);
 ```
+
+The TypeScript example keeps its optional Web Audio player, recorded tracks, and
+procedural fallback scores under `examples/src/`. It listens for
+`world-changed`, starts audio only after the viewer clicks **Music on**, and
+releases the player when music is turned off or the page exits. The npm package
+does not create an audio context or fetch music.
 
 Example-specific planets, storms, black holes, and model catalogs are outside
 the library. `@shihangw/rowrunner/geometry` exports road drawing helpers for custom paths.

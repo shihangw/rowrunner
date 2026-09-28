@@ -7,6 +7,7 @@ import type {
   SceneFrame,
   ModelData,
   CameraMode,
+  SceneEvent,
   RoadEffect,
   SpeedScale,
   ResolvedScene,
@@ -25,7 +26,6 @@ import {validatePreset} from './preset_validation.js';
 import {PluginInstanceHost} from './plugins/plugin_instance_host.js';
 import {createPluginRegistry} from './plugins/plugin_registry.js';
 import {SceneRenderer} from './scene_renderer.js';
-import {WorldMusicPlayer} from './world_music_player.js';
 import {drawRoad, roadSurface, validateRoadEffect} from './road_geometry.js';
 import {
   cameraPose,
@@ -137,7 +137,7 @@ export class RoadScene {
   private disposed = false;
   private wasCompleted = false;
   private pluginHost?: PluginInstanceHost;
-  private musicPlayer?: WorldMusicPlayer;
+  private readonly onEvent?: (event: SceneEvent) => void;
   private transform: ((point: Vec3) => Vec3) | null = null;
   private worldTransform: ((point: Vec3) => Vec3) | null = null;
   private vertices: number[] = [];
@@ -164,6 +164,7 @@ export class RoadScene {
       roadEffect = 'none',
       speedScale = 'logarithmic',
       visualRateMultiplier = 1,
+      onEvent,
     }: SceneOptions = {},
   ) {
     const alias = <T>(
@@ -255,6 +256,11 @@ export class RoadScene {
       visualRateMultiplier,
       'visualRateMultiplier',
     )!;
+    this.onEvent = parseInput(
+      SceneOptionsSchema.shape.onEvent,
+      onEvent,
+      'onEvent',
+    );
     this.cameraTime = 0;
     this.stationaryPass = new StationaryCameraPass();
     this.worldElapsedSeconds = 0;
@@ -306,47 +312,29 @@ export class RoadScene {
   setRunner(id: string) {
     this.setProtagonist(id);
   }
+  private emit(event: SceneEvent): void {
+    this.onEvent?.(Object.freeze(event));
+  }
   /** Change presentation without resetting distance, animation time, or telemetry. */
   setScene(id: string) {
-    this.scenePreset = validatePreset(id, this.scenes, 'scene');
-    this.musicPlayer?.setWorld(this.scenePreset);
+    const nextWorldId = validatePreset(id, this.scenes, 'scene');
+    const previousWorldId = this.scenePreset;
+    this.scenePreset = nextWorldId;
     this.worldElapsedSeconds = 0;
     this.biomeTransition = null;
     this.pathEntry = null;
-  }
-  /** Enable music from a user gesture; sound is off until explicitly requested. */
-  async setMusicEnabled(enabled: boolean): Promise<void> {
-    if (typeof enabled !== 'boolean') {
-      throw new TypeError('enabled must be a boolean');
+    if (previousWorldId !== nextWorldId) {
+      this.emit({
+        type: 'world-changed',
+        previousWorldId,
+        worldId: nextWorldId,
+        reason: 'manual',
+      });
     }
-    if (this.disposed) {
-      throw new Error('Cannot change music on a disposed scene');
-    }
-    if (!enabled) {
-      this.musicPlayer?.dispose();
-      this.musicPlayer = undefined;
-      return;
-    }
-    if (this.musicPlayer != null) {
-      return;
-    }
-    const player = new WorldMusicPlayer(this.scenes);
-    this.musicPlayer = player;
-    try {
-      await player.start(this.scenePreset);
-    } catch (error) {
-      player.dispose();
-      if (this.musicPlayer === player) {
-        this.musicPlayer = undefined;
-      }
-      throw error;
-    }
-  }
-  get musicEnabled(): boolean {
-    return this.musicPlayer != null;
   }
   setCamera(mode: CameraMode) {
     validateCamera(mode);
+    const previousMode = this.cameraMode;
     if (mode === 'stationary' && this.cameraMode !== mode) {
       this.stationaryPass = new StationaryCameraPass(this.distance);
     }
@@ -357,6 +345,9 @@ export class RoadScene {
       this.pathEntry!.introFinished = true;
     }
     this.cameraMode = mode;
+    if (previousMode !== mode) {
+      this.emit({type: 'camera-mode-changed', previousMode, mode});
+    }
   }
   setAutoBiomes(enabled: boolean) {
     if (typeof enabled !== 'boolean') {
@@ -383,7 +374,12 @@ export class RoadScene {
     return this.mascotPreset;
   }
   setProtagonist(id: string) {
-    this.mascotPreset = validatePreset(id, this.protagonists, 'protagonist');
+    const runnerId = validatePreset(id, this.protagonists, 'protagonist');
+    const previousRunnerId = this.mascotPreset;
+    this.mascotPreset = runnerId;
+    if (previousRunnerId !== runnerId) {
+      this.emit({type: 'runner-changed', previousRunnerId, runnerId});
+    }
   }
   setMascot(id: string) {
     this.setProtagonist(id);
@@ -763,9 +759,14 @@ export class RoadScene {
       fade = Math.sin(raw * Math.PI) ** 4;
       if (raw >= 0.5 && this.scenePreset !== to) {
         this.scenePreset = to;
-        this.musicPlayer?.setWorld(to);
         this.worldElapsedSeconds = 0;
         fade = 1;
+        this.emit({
+          type: 'world-changed',
+          previousWorldId: from,
+          worldId: to,
+          reason: 'scheduled',
+        });
       }
       if (raw === 1) {
         this.biomeTransition = null;
@@ -803,7 +804,11 @@ export class RoadScene {
     if (this.wasCompleted && !completed && this.cameraMode === 'cinematic') {
       this.cinematic!.rebase(this.distance);
     }
+    const completionChanged = this.wasCompleted !== completed;
     this.wasCompleted = completed;
+    if (completionChanged) {
+      this.emit({type: 'completion-changed', completed});
+    }
     const activeCameraMode = completed ? 'approach' : this.cameraMode;
     const cinematicDirector =
       activeCameraMode === 'cinematic' ? this.cinematic : null;
@@ -1011,7 +1016,16 @@ export class RoadScene {
         (nearClipDistance - farClipDistance),
       0,
     ]);
+    const previousShot = this.cameraShot;
     this.cameraShot = pose.label;
+    if (previousShot !== this.cameraShot) {
+      this.emit({
+        type: 'camera-shot-changed',
+        previousShot,
+        shot: this.cameraShot,
+        mode: activeCameraMode,
+      });
+    }
     const orbit = hasCurvedPath
       ? world.path!.createFrame(worldOriginDistance, this.pathEntry!.distance)
       : null;
@@ -1209,8 +1223,6 @@ export class RoadScene {
       return;
     }
     this.disposed = true;
-    this.musicPlayer?.dispose();
-    this.musicPlayer = undefined;
     this.canvas.removeEventListener('webglcontextlost', this.onLost);
     this.canvas.removeEventListener('webglcontextrestored', this.onRestored);
     try {
