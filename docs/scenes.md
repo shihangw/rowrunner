@@ -81,6 +81,17 @@ procedural fallback scores under `examples/src/`. It listens for
 releases the player when music is turned off or the page exits. The npm package
 does not create an audio context or fetch music.
 
+### Migrating from 0.3.x
+
+World definitions no longer accept `music`, and `RoadScene` no longer has
+`setMusicEnabled()` or `musicEnabled`. Keep soundtrack configuration and audio
+playback in your application. Pass `onEvent` when constructing `RoadScene`,
+initialize the player from `scene.world`, and switch tracks when a
+`world-changed` event arrives. The callback also reports runner, camera, and
+completion changes, so the same integration point can drive other app-owned
+effects. See the [example music player](../examples/src/world_music_player.ts)
+and [dashboard integration](../examples/src/progress_dashboard.ts).
+
 Example-specific planets, storms, black holes, and model catalogs are outside
 the library. `@shihangw/rowrunner/geometry` exports road drawing helpers for custom paths.
 
