@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0](https://github.com/shihangw/rowrunner/compare/v0.3.0...v0.4.0) (2026-09-28)
+
+### ⚠ BREAKING CHANGES
+
+- World music and RoadScene music controls moved to the example; applications now use onEvent for scene changes.
+
+### Features
+
+- document caller-owned music migration ([#13](https://github.com/shihangw/rowrunner/issues/13)) ([6954752](https://github.com/shihangw/rowrunner/commit/69547525a21fe8462df29cf7423aca99f838686d))
+
 ## [0.3.0](https://github.com/shihangw/rowrunner/compare/v0.2.0...v0.3.0) (2026-09-25)
 
 ### Features

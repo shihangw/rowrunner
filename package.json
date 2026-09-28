@@ -1,6 +1,6 @@
 {
   "name": "@shihangw/rowrunner",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Turn cumulative progress into smooth live speed estimates, procedural 3D scenes, and animated mascots.",
   "license": "MIT",
   "type": "module",
