@@ -87,6 +87,13 @@ The version pull request updates `package.json`, `package-lock.json`, the releas
 manifest, and the changelog together. Review and merge it when ready; ordinary
 feature PRs do not edit version numbers.
 
+For automatic version PRs, add a `RELEASE_PLEASE_TOKEN` Actions secret to this
+repository. Use a fine-grained GitHub token limited to this public repository
+with **Contents: write**, **Pull requests: write**, **Issues: write**, and
+**Actions: read**. The Release workflow skips PR creation until this secret is
+configured. This keeps the repository-wide "Actions can create and approve PRs"
+setting disabled. Renew the token before it expires.
+
 Run **Deploy Canary** in the private deployment repository with the candidate
 tag you want to test. QA the [private Cloud Run canary](docs/cloud_run_canary.md).
 After QA, merge the Release Please version pull request; this creates the npm
@@ -94,6 +101,10 @@ version tag and GitHub release. Run **Promote Canary** in the private deployment
 repository with that release tag, the candidate tag you tested, and the
 successful Deploy Canary run ID from its URL. Promote verifies the canary run
 and triggers public **Ship** with those tags.
+For automatic dispatch, add `PUBLIC_SHIP_DISPATCH_TOKEN` as an encrypted Actions
+secret in the private deployment repository. Use a separate fine-grained GitHub
+token limited to this public repository with **Actions: write**. The private
+workflow does not need a token that can access any other repository.
 Ship rejects a release with non-release changes beyond the tested candidate;
 version and changelog files may differ. If other changes landed in the meantime,
 run **Deploy Canary** again with the release tag, QA it, and use that same release

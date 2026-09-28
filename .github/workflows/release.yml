@@ -6,8 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: rowrunner-release
@@ -18,10 +17,17 @@ jobs:
     name: Prepare version pull request
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      RELEASE_PLEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
     steps:
+      - name: Report missing release token
+        if: env.RELEASE_PLEASE_TOKEN == ''
+        run: echo '::notice::Set RELEASE_PLEASE_TOKEN to enable automatic version PRs.'
       - name: Create or update release pull request
+        if: env.RELEASE_PLEASE_TOKEN != ''
         id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
+          token: ${{ env.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
