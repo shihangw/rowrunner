@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.0](https://github.com/shihangw/rowrunner/compare/v0.4.0...v0.5.0) (2026-09-30)
+
+### Features
+
+- configure camera shot angles and durations ([#16](https://github.com/shihangw/rowrunner/issues/16)) ([0755f92](https://github.com/shihangw/rowrunner/commit/0755f925aadd4d8c7c3df9e700ac4fd65c40e6e4))
+
 ## [0.4.0](https://github.com/shihangw/rowrunner/compare/v0.3.0...v0.4.0) (2026-09-28)
 
 ### ⚠ BREAKING CHANGES
