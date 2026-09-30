@@ -2,6 +2,9 @@ import type {Object3D} from 'three';
 import type {z} from 'zod';
 import type {
   CameraModeSchema,
+  CameraShotSchema,
+  CameraShotOptionsSchema,
+  CameraShotsSchema,
   SceneEventSchema,
   RoadEffectSchema,
   SpeedScaleSchema,
@@ -23,6 +26,9 @@ export type ScenePresetId = string;
 export type MascotPresetId = string;
 export type ProtagonistPresetId = string;
 export type CameraMode = z.infer<typeof CameraModeSchema>;
+export type CameraShot = z.infer<typeof CameraShotSchema>;
+export type CameraShotOptions = z.infer<typeof CameraShotOptionsSchema>;
+export type CameraShots = z.infer<typeof CameraShotsSchema>;
 export type SceneEvent = z.infer<typeof SceneEventSchema>;
 export type RoadEffect = z.infer<typeof RoadEffectSchema>;
 export type SpeedScale = z.infer<typeof SpeedScaleSchema>;

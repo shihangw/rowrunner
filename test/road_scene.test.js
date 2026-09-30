@@ -225,6 +225,67 @@ test('manual camera poses remain fixed and approach faces the protagonist', () =
   assert.throws(() => cameraPose(0, 'invalid'), RangeError);
 });
 
+test('camera shot angles adjust manual, cinematic, and stationary poses', () => {
+  const cameraShots = {
+    side: {
+      azimuthDegrees: 90,
+      elevationDegrees: 0,
+      distance: 20,
+      targetOffset: [1, 2, 3],
+    },
+    'stationary-approach': {elevationDegrees: 15},
+  };
+  const side = cameraPose(0, 'side', cameraShots);
+  assert.deepEqual(side.target, [1, 5.7, 5]);
+  assert.ok(Math.abs(side.eye[0] - 21) < 1e-10);
+  assert.ok(Math.abs(side.eye[1] - 5.7) < 1e-10);
+  assert.ok(Math.abs(side.eye[2] - 5) < 1e-10);
+  const director = new CinematicCameraDirector(0, () => 0.5, cameraShots);
+  assert.deepEqual(director.pose(), side);
+  director.remaining = ['chase'];
+  director.next(0);
+  assert.deepEqual(director.pose().eye, side.eye);
+  assert.deepEqual(director.pose().target, side.target);
+  director.advance(500, 4, 0, 40, false);
+  assert.deepEqual(director.pose(), cameraPose(0, 'chase', cameraShots));
+  const pass = new StationaryCameraPass(0, () => 0.1);
+  assert.equal(pass.shot, 'approach');
+  const base = stationaryPose(pass.frame, () => 0);
+  const adjusted = stationaryPose(pass.frame, () => 0, cameraShots);
+  const horizontal = Math.hypot(
+    adjusted.eye[0] - adjusted.target[0],
+    adjusted.eye[2] - adjusted.target[2],
+  );
+  assert.equal(adjusted.target[1], base.target[1]);
+  assert.ok(
+    Math.abs(
+      (Math.atan2(adjusted.eye[1] - adjusted.target[1], horizontal) * 180) /
+        Math.PI -
+        15,
+    ) < 1e-10,
+  );
+});
+
+test('cinematic tracking shots use six-second baseline, longer sides, and configured durations', () => {
+  const standard = new CinematicCameraDirector(0, () => 0.5);
+  assert.equal(standard.shot, 'side');
+  assert.equal(standard.advance(500, 7.95, 0, 40, false), false);
+  assert.equal(standard.advance(500, 0.05, 0, 40, false), true);
+  standard.remaining = ['chase'];
+  standard.next(0);
+  assert.equal(standard.advance(500, 5.95, 0, 40, false), false);
+  assert.equal(standard.advance(500, 0.05, 0, 40, false), true);
+  standard.remaining = ['starboard'];
+  standard.next(0);
+  assert.equal(standard.advance(500, 7.95, 0, 40, false), false);
+  assert.equal(standard.advance(500, 0.05, 0, 40, false), true);
+  const extended = new CinematicCameraDirector(0, () => 0.5, {
+    side: {durationSeconds: 12},
+  });
+  assert.equal(extended.advance(500, 11.95, 0, 40, false), false);
+  assert.equal(extended.advance(500, 0.05, 0, 40, false), true);
+});
+
 test('cinematic visits all ten views once per shuffled cycle, with fixed full stationary passes', () => {
   let seed = 71;
   const random = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32;
@@ -478,7 +539,7 @@ test('journeys follow custom lineup order and a single scene never fades to itse
   assert.equal(scene.biomeTransition, null);
 });
 
-test('stationary road segments preserve the same world speed and take at least six seconds', () => {
+test('stationary road segments preserve world speed and take at least ten seconds', () => {
   for (const rate of [80, 500, 1800, 1e9]) {
     const pass = new StationaryCameraPass(500);
     let distance = 500;
@@ -499,11 +560,25 @@ test('stationary road segments preserve the same world speed and take at least s
         );
       }
     }
-    assert.ok(elapsed >= 6 - 1e-8, `rate ${rate}: pass too short (${elapsed})`);
+    assert.ok(
+      elapsed >= 10 - 1e-8,
+      `rate ${rate}: pass too short (${elapsed})`,
+    );
     assert.ok(elapsed <= 30.1, `rate ${rate}: pass did not finish`);
     assert.ok(Math.abs(pass.frame.protagonistZ + 55) < 1e-8);
-    assert.equal(pass.segmentLength, Math.max(180, travelSpeed(rate) * 6));
+    assert.equal(pass.segmentLength, Math.max(180, travelSpeed(rate) * 10));
   }
+});
+
+test('stationary shot duration controls the minimum pass time and road length', () => {
+  const pass = new StationaryCameraPass(0, () => 0.1, {
+    'stationary-approach': {durationSeconds: 12},
+  });
+  assert.equal(pass.shot, 'approach');
+  assert.equal(pass.advance(500, 0, 0, 40, false), false);
+  assert.equal(pass.segmentLength, 480);
+  assert.equal(pass.advance(500, 11.95, 478, 40, false), false);
+  assert.equal(pass.advance(500, 0.05, 480, 40, false), true);
 });
 
 test('stationary speed spikes do not slow travel or move the camera before the minimum shot time', () => {
@@ -566,15 +641,15 @@ test('stationary camera chooses either side only when a new pass starts', () => 
   pass.advance(500, 4, speed * 5);
   assert.deepEqual(stationaryPose(pass.frame, centerX), fixed);
   assert.equal(calls, 2);
-  pass.advance(500, 1, speed * 6);
+  pass.advance(500, 5, speed * 10);
   assert.equal(pass.frame.side, 1);
   assert.equal(calls, 4);
   const right = stationaryPose(pass.frame, centerX);
   assert.equal(right.eye[0], centerX(right.eye[2]) + 18);
-  pass.advance(0, 100, speed * 6);
+  pass.advance(0, 100, speed * 10);
   assert.equal(pass.frame.side, 1);
   assert.equal(calls, 4);
-  pass.advance(500, 6, speed * 12);
+  pass.advance(500, 10, speed * 20);
   assert.equal(pass.frame.side, -1);
   assert.equal(calls, 6);
 });
@@ -611,11 +686,11 @@ test('stationary cuts cover five distinct angles without changing a shot in prog
       Math.atan2(pose.eye[1] - pose.target[1], horizontal) < Math.PI / 4,
       'Passing camera is too close to a top-down view',
     );
-    pass.advance(500, 3, pass.startDistance + pass.segmentLength / 2);
+    pass.advance(500, 5, pass.startDistance + pass.segmentLength / 2);
     assert.deepEqual(stationaryPose(pass.frame, centerX), pose);
     pass.advance(0, 30, pass.distance);
     assert.deepEqual(stationaryPose(pass.frame, centerX), pose);
-    pass.advance(500, 3, pass.startDistance + pass.segmentLength + 1e-8);
+    pass.advance(500, 5, pass.startDistance + pass.segmentLength + 1e-8);
     previous = shot;
   }
   assert.deepEqual(
@@ -676,7 +751,7 @@ for (const [rate, intervalSeconds] of [
       let worldDuration = 0;
       let sawFadeOut = false;
       let sawFadeIn = false;
-      for (let frame = 0; frame < 6000 && worldChanges < 6; frame++) {
+      for (let frame = 0; frame < 10000 && worldChanges < 6; frame++) {
         const previousShot = scene.cinematic.shot;
         const previousWorld = scene.world;
         scene.render(rate, 0.05);

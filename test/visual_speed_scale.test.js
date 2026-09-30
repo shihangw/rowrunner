@@ -120,7 +120,7 @@ test('all cameras share visual travel while custom callbacks retain the original
           if (mode === 'stationary') {
             assert.equal(
               scene.stationaryPass.segmentLength,
-              Math.max(180, frame.visualSpeed * 6),
+              Math.max(180, frame.visualSpeed * 10),
             );
             assert.ok(
               Math.abs(
