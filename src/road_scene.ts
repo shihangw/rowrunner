@@ -7,6 +7,7 @@ import type {
   SceneFrame,
   ModelData,
   CameraMode,
+  CameraShots,
   SceneEvent,
   RoadEffect,
   SpeedScale,
@@ -103,6 +104,7 @@ export class RoadScene {
   mascotPreset: string;
   cameraMode: CameraMode;
   cameraShot: string;
+  readonly cameraShots: CameraShots;
   autoBiomes: boolean;
   roadEffect: RoadEffect;
   speedScale: SpeedScale;
@@ -154,6 +156,7 @@ export class RoadScene {
       scenes,
       protagonists,
       camera: cameraMode = 'cinematic',
+      cameraShots,
       autoBiomes = false,
       worldSwitchIntervalSeconds = 20,
       plugins,
@@ -239,7 +242,13 @@ export class RoadScene {
       'protagonist',
     );
     this.cameraMode = validateCamera(cameraMode);
-    this.cameraShot = cameraPose(0, cameraMode).label;
+    this.cameraShots =
+      parseInput(
+        SceneOptionsSchema.shape.cameraShots,
+        cameraShots,
+        'cameraShots',
+      ) ?? {};
+    this.cameraShot = cameraPose(0, cameraMode, this.cameraShots).label;
     if (typeof autoBiomes !== 'boolean') {
       throw new TypeError('autoBiomes must be a boolean');
     }
@@ -262,7 +271,11 @@ export class RoadScene {
       'onEvent',
     );
     this.cameraTime = 0;
-    this.stationaryPass = new StationaryCameraPass();
+    this.stationaryPass = new StationaryCameraPass(
+      0,
+      Math.random,
+      this.cameraShots,
+    );
     this.worldElapsedSeconds = 0;
     this.biomeTransition = null;
     this.geometry = Object.freeze({
@@ -336,7 +349,11 @@ export class RoadScene {
     validateCamera(mode);
     const previousMode = this.cameraMode;
     if (mode === 'stationary' && this.cameraMode !== mode) {
-      this.stationaryPass = new StationaryCameraPass(this.distance);
+      this.stationaryPass = new StationaryCameraPass(
+        this.distance,
+        Math.random,
+        this.cameraShots,
+      );
     }
     if (mode === 'cinematic' && this.cameraMode !== mode) {
       this.cinematic?.rebase(this.distance);
@@ -794,12 +811,20 @@ export class RoadScene {
       return;
     }
     if (this.cameraMode === 'cinematic') {
-      this.cinematic ??= new CinematicCameraDirector(this.distance);
+      this.cinematic ??= new CinematicCameraDirector(
+        this.distance,
+        Math.random,
+        this.cameraShots,
+      );
     }
     // Completion temporarily frames the protagonist from the front. Keep the
     // caller's selected camera so a new run resumes its original composition.
     if (this.wasCompleted && !completed && this.cameraMode === 'stationary') {
-      this.stationaryPass = new StationaryCameraPass(this.distance);
+      this.stationaryPass = new StationaryCameraPass(
+        this.distance,
+        Math.random,
+        this.cameraShots,
+      );
     }
     if (this.wasCompleted && !completed && this.cameraMode === 'cinematic') {
       this.cinematic!.rebase(this.distance);
@@ -967,12 +992,12 @@ export class RoadScene {
       );
     }
     let pose = isPlayingPathIntroduction
-      ? cameraPose(0, 'chase')
+      ? cameraPose(0, 'chase', this.cameraShots)
       : stationaryFrame != null
-        ? stationaryPose(stationaryFrame, roadCenterXAt)
+        ? stationaryPose(stationaryFrame, roadCenterXAt, this.cameraShots)
         : cinematicDirector != null
           ? cinematicDirector.pose()
-          : cameraPose(this.cameraTime, activeCameraMode);
+          : cameraPose(this.cameraTime, activeCameraMode, this.cameraShots);
     if (world.path?.camera != null) {
       pose = world.path!.camera(pose, isStationary, completed);
     }

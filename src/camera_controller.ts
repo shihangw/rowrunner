@@ -1,8 +1,16 @@
 import {
   CameraModeSchema,
+  CameraShotSchema,
   SpeedScaleSchema,
 } from './scene_configuration_schemas.js';
-import type {CameraMode, CameraPose, SpeedScale, Vec3} from './scene_types.js';
+import type {
+  CameraMode,
+  CameraPose,
+  CameraShot,
+  CameraShots,
+  SpeedScale,
+  Vec3,
+} from './scene_types.js';
 export interface StationaryFrame {
   worldDistance: number;
   protagonistZ: number;
@@ -25,14 +33,63 @@ export function validateCamera(mode: CameraMode) {
   }
   return mode;
 }
+function configuredPose(
+  pose: CameraPose,
+  shot: CameraShot,
+  cameraShots: CameraShots,
+): CameraPose {
+  const options = cameraShots[shot];
+  if (
+    options == null ||
+    (options.azimuthDegrees == null &&
+      options.elevationDegrees == null &&
+      options.distance == null &&
+      options.targetOffset == null)
+  ) {
+    return pose;
+  }
+  const offset = options.targetOffset ?? [0, 0, 0];
+  const target: Vec3 = [
+    pose.target[0] + offset[0],
+    pose.target[1] + offset[1],
+    pose.target[2] + offset[2],
+  ];
+  const direction = pose.eye.map(
+    (coordinate, index) => coordinate - pose.target[index],
+  );
+  const azimuth =
+    options.azimuthDegrees == null
+      ? Math.atan2(direction[0], direction[2])
+      : (options.azimuthDegrees * Math.PI) / 180;
+  const elevation =
+    options.elevationDegrees == null
+      ? Math.atan2(direction[1], Math.hypot(direction[0], direction[2]))
+      : (options.elevationDegrees * Math.PI) / 180;
+  const distance = options.distance ?? Math.hypot(...direction);
+  const horizontalDistance = distance * Math.cos(elevation);
+  return {
+    eye: [
+      target[0] + Math.sin(azimuth) * horizontalDistance,
+      target[1] + Math.sin(elevation) * distance,
+      target[2] + Math.cos(azimuth) * horizontalDistance,
+    ],
+    target,
+    label: pose.label,
+  };
+}
 /** Fixed tracking poses; cinematic sequencing is owned by each scene's director. */
 export function cameraPose(
   time: number,
   mode: CameraMode = 'cinematic',
+  cameraShots: CameraShots = {},
 ): CameraPose {
   validateCamera(mode);
   if (mode === 'approach') {
-    return {eye: [1.5, 5.7, 16], target: [0, 3.5, -1], label: 'Approach'};
+    return configuredPose(
+      {eye: [1.5, 5.7, 16], target: [0, 3.5, -1], label: 'Approach'},
+      'approach',
+      cameraShots,
+    );
   }
   if (mode === 'stationary') {
     return {
@@ -41,9 +98,12 @@ export function cameraPose(
       label: 'Stationary · pass-by',
     };
   }
-  return trackingCameraPoses[
-    {cinematic: 1, chase: 0, side: 1, aerial: 3}[mode]
-  ];
+  const shot = mode === 'cinematic' ? 'side' : mode;
+  return configuredPose(
+    trackingCameraPoses[{side: 1, chase: 0, aerial: 3}[shot]],
+    shot,
+    cameraShots,
+  );
 }
 
 export function validateSpeedScale(scale: SpeedScale) {
@@ -66,18 +126,22 @@ export function travelSpeed(
     ? processingRate * 0.075
     : 40 * (Math.log1p(processingRate / 6.25) / Math.log(17));
 }
-const MINIMUM_STATIONARY_SHOT_DURATION_SECONDS = 6;
-const STATIONARY_SHOTS = [
-  'approach',
-  'departure',
-  'crossing',
-  'diagonal',
-  'overlook',
-];
+const DEFAULT_STATIONARY_SHOT_DURATION_SECONDS = 10;
+const DEFAULT_TRACKING_SHOT_DURATION_SECONDS = 6;
+const DEFAULT_SIDE_TRACKING_SHOT_DURATION_SECONDS = 8;
+function defaultTrackingDurationSeconds(shot: string) {
+  return shot === 'side' || shot === 'starboard'
+    ? DEFAULT_SIDE_TRACKING_SHOT_DURATION_SECONDS
+    : DEFAULT_TRACKING_SHOT_DURATION_SECONDS;
+}
+const STATIONARY_SHOTS = CameraShotSchema.options
+  .filter((shot) => shot.startsWith('stationary-'))
+  .map((shot) => shot.slice('stationary-'.length));
 
 /** A fixed viewpoint over a real road segment, without a separate animation speed. */
 export class StationaryCameraPass {
   private readonly random: () => number;
+  private readonly cameraShots: CameraShots;
   startDistance: number;
   worldDistance: number;
   distance: number;
@@ -86,8 +150,13 @@ export class StationaryCameraPass {
   side!: number;
   shot = '';
   private remainingShots: string[] = [];
-  constructor(distance = 0, random = Math.random) {
+  constructor(
+    distance = 0,
+    random = Math.random,
+    cameraShots: CameraShots = {},
+  ) {
     this.random = random;
+    this.cameraShots = cameraShots;
     this.chooseShot();
     this.startDistance = distance;
     this.worldDistance = distance + 55;
@@ -105,6 +174,12 @@ export class StationaryCameraPass {
     this.shot = choices[Math.floor(this.random() * choices.length)];
     this.remainingShots.splice(this.remainingShots.indexOf(this.shot), 1);
   }
+  private get minimumDurationSeconds() {
+    return (
+      this.cameraShots[`stationary-${this.shot}` as CameraShot]
+        ?.durationSeconds ?? DEFAULT_STATIONARY_SHOT_DURATION_SECONDS
+    );
+  }
   advance(
     processingRate: number,
     deltaSeconds: number,
@@ -115,7 +190,7 @@ export class StationaryCameraPass {
     if (this.segmentLength === null && processingRate > 0) {
       this.segmentLength = Math.max(
         180,
-        visualSpeed * MINIMUM_STATIONARY_SHOT_DURATION_SECONDS,
+        visualSpeed * this.minimumDurationSeconds,
       );
     }
     this.distance = distance;
@@ -124,17 +199,17 @@ export class StationaryCameraPass {
     }
     const hasFinishedPass =
       this.segmentLength !== null &&
-      this.elapsed >= MINIMUM_STATIONARY_SHOT_DURATION_SECONDS &&
+      this.elapsed >= this.minimumDurationSeconds &&
       distance - this.startDistance >= this.segmentLength;
     if (hasFinishedPass && shouldAdvanceAutomatically) {
       this.startDistance = distance;
       this.worldDistance = distance + 55;
-      this.segmentLength = Math.max(
-        180,
-        visualSpeed * MINIMUM_STATIONARY_SHOT_DURATION_SECONDS,
-      );
       this.elapsed = 0;
       this.chooseShot();
+      this.segmentLength = Math.max(
+        180,
+        visualSpeed * this.minimumDurationSeconds,
+      );
     }
     return hasFinishedPass;
   }
@@ -149,34 +224,39 @@ export class StationaryCameraPass {
   }
 }
 
-export const CINEMATIC_SHOTS = Object.freeze([
-  'chase',
-  'side',
-  'starboard',
-  'aerial',
-  'approach',
-  ...STATIONARY_SHOTS.map((shot) => `stationary-${shot}`),
+export const CINEMATIC_SHOTS: readonly CameraShot[] = Object.freeze([
+  ...CameraShotSchema.options,
 ]);
-const trackingPose = (id: string): CameraPose =>
-  id === 'starboard' ? trackingCameraPoses[2] : cameraPose(0, id as CameraMode);
+const trackingPose = (id: string, cameraShots: CameraShots): CameraPose =>
+  id === 'starboard'
+    ? configuredPose(trackingCameraPoses[2], 'starboard', cameraShots)
+    : cameraPose(0, id as CameraMode, cameraShots);
 
 /** Opens with side tracking, then visits every view in a shuffled round robin. */
 export class CinematicCameraDirector {
   private readonly random: () => number;
+  private readonly cameraShots: CameraShots;
   private remaining: string[];
   shot = '';
   pass: StationaryCameraPass | null = null;
   private from: CameraPose | null = null;
   private elapsed = 0;
-  constructor(distance = 0, random = Math.random) {
+  constructor(
+    distance = 0,
+    random = Math.random,
+    cameraShots: CameraShots = {},
+  ) {
     this.random = random;
+    this.cameraShots = cameraShots;
     this.remaining = [];
     this.next(distance);
   }
   next(distance: number, velocity = 0) {
     const previous = this.shot;
     const previousPose =
-      previous !== '' && this.pass == null ? trackingPose(previous) : null;
+      previous !== '' && this.pass == null
+        ? trackingPose(previous, this.cameraShots)
+        : null;
     if (this.remaining.length === 0) {
       this.remaining = [...CINEMATIC_SHOTS];
       for (let i = this.remaining.length - 1; i > 0; i--) {
@@ -205,7 +285,9 @@ export class CinematicCameraDirector {
     if (this.pass != null && velocity > 0) {
       this.pass.segmentLength = Math.max(
         180,
-        velocity * MINIMUM_STATIONARY_SHOT_DURATION_SECONDS,
+        velocity *
+          (this.cameraShots[`stationary-${this.pass.shot}` as CameraShot]
+            ?.durationSeconds ?? DEFAULT_STATIONARY_SHOT_DURATION_SECONDS),
       );
     }
     this.from = this.pass != null ? null : previousPose;
@@ -215,7 +297,11 @@ export class CinematicCameraDirector {
     this.from = null;
     this.pass = null;
     if (this.shot.startsWith('stationary-')) {
-      this.pass = new StationaryCameraPass(distance, this.random);
+      this.pass = new StationaryCameraPass(
+        distance,
+        this.random,
+        this.cameraShots,
+      );
       this.pass.shot = this.shot.slice('stationary-'.length);
     }
   }
@@ -239,14 +325,16 @@ export class CinematicCameraDirector {
             visualSpeed,
             false,
           )
-        : this.elapsed >= 16;
+        : this.elapsed >=
+          (this.cameraShots[this.shot as CameraShot]?.durationSeconds ??
+            defaultTrackingDurationSeconds(this.shot));
     if (hasFinishedPass && shouldAdvanceAutomatically) {
       this.next(distance, visualSpeed);
     }
     return hasFinishedPass;
   }
   pose(): CameraPose {
-    const to = trackingPose(this.shot);
+    const to = trackingPose(this.shot, this.cameraShots);
     if (this.from == null || this.elapsed >= 4) {
       return to;
     }
@@ -282,6 +370,7 @@ export class CinematicCameraDirector {
 export function stationaryPose(
   frame: StationaryFrame,
   centerX: (z: number) => number,
+  cameraShots: CameraShots = {},
 ): CameraPose {
   const length = frame.segmentLength;
   const shot = frame.shot ?? 'approach';
@@ -325,15 +414,19 @@ export function stationaryPose(
   const composition = compositions[shot as keyof typeof compositions];
   const eyeZ = length * composition.eye - 55;
   const targetZ = length * composition.target - 55;
-  return {
-    eye: [
-      centerX(eyeZ) + frame.side * composition.offset,
-      composition.height,
-      eyeZ,
-    ],
-    target: [centerX(targetZ), 3.2, targetZ],
-    label: `Stationary · ${frame.side < 0 ? 'left' : 'right'} ${composition.label}`,
-  };
+  return configuredPose(
+    {
+      eye: [
+        centerX(eyeZ) + frame.side * composition.offset,
+        composition.height,
+        eyeZ,
+      ],
+      target: [centerX(targetZ), 3.2, targetZ],
+      label: `Stationary · ${frame.side < 0 ? 'left' : 'right'} ${composition.label}`,
+    },
+    `stationary-${shot}` as CameraShot,
+    cameraShots,
+  );
 }
 
 /** Keep both road ends beyond wide stationary compositions, including their rear view. */

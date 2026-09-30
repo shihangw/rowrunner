@@ -112,13 +112,42 @@ inferred from visual movement.
 scene/protagonist/mascot aliases remain supported; conflicting aliases throw.
 
 Cameras: `cinematic`, `chase`, `approach`, `side`, `aerial`, `stationary`.
-Cinematic mode shuffles all ten compositions once per cycle. With automatic
-world changes enabled, `worldSwitchIntervalSeconds` schedules a new world every
+Cinematic mode shuffles all ten compositions once per cycle. Tracking views
+stay for six seconds by default. Side and starboard tracking stay for eight
+seconds; stationary passing views stay for at least ten seconds and may last
+longer until the runner traverses their full road segment. Override individual
+angles and durations with `cameraShots`:
+
+```ts
+const scene = new RoadScene(canvas, {
+  worlds: [myWorld],
+  runners: [myRunner],
+  camera: 'cinematic',
+  cameraShots: {
+    side: {azimuthDegrees: -105, elevationDegrees: 12, durationSeconds: 12},
+    chase: {durationSeconds: 7},
+    'stationary-crossing': {elevationDegrees: 18, durationSeconds: 14},
+  },
+});
+```
+
+Each shot accepts `azimuthDegrees`, `elevationDegrees`, `distance`,
+`targetOffset: [x, y, z]`, and `durationSeconds` (minimum five seconds).
+Azimuth 0° places the eye along +Z from its target; positive angles turn toward
++X. Elevation is measured above the road plane. Unspecified values retain the
+shot's built-in pose. The keys are `chase`, `side`, `starboard`, `aerial`,
+`approach`, and `stationary-approach`, `stationary-departure`,
+`stationary-crossing`, `stationary-diagonal`, `stationary-overlook`. Manual
+camera modes use the same settings; completion uses the `approach` settings.
+Configured stationary durations are minimums because a passing view stays fixed
+until its road segment has moved through the shot.
+
+With automatic world changes enabled, `worldSwitchIntervalSeconds` schedules a new world every
 20 seconds by default. Cinematic mode waits for the next completed shot, then
 fades out, swaps world and camera together, and fades in. Other camera modes
 fade to the next world when the interval expires. The schedule pauses while
-progress is stopped, completed, or reduced motion is active. Passing views hold
-for at least six seconds. `render(rate, dt, { completed: true })` temporarily
+progress is stopped, completed, or reduced motion is active.
+`render(rate, dt, { completed: true })` temporarily
 uses the approaching camera. `CompletionCelebration` from `@shihangw/rowrunner/scene`
 provides the persistent configurable heading and looping confetti.
 

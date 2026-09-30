@@ -51,6 +51,35 @@ export const VisualRateMultiplierSchema = z.number().finite().positive();
 export const Vec3Schema = z
   .tuple([z.number(), z.number(), z.number()])
   .readonly();
+export const CameraShotSchema = z.enum([
+  'chase',
+  'side',
+  'starboard',
+  'aerial',
+  'approach',
+  'stationary-approach',
+  'stationary-departure',
+  'stationary-crossing',
+  'stationary-diagonal',
+  'stationary-overlook',
+]);
+export const CameraShotOptionsSchema = z
+  .strictObject({
+    /** Zero looks from +Z; positive angles orbit toward +X. */
+    azimuthDegrees: z.number().finite().optional(),
+    elevationDegrees: z.number().finite().min(-89).max(89).optional(),
+    distance: z.number().finite().positive().optional(),
+    targetOffset: z
+      .tuple([z.number().finite(), z.number().finite(), z.number().finite()])
+      .readonly()
+      .optional(),
+    /** Tracking duration, or minimum stationary pass duration, in seconds. */
+    durationSeconds: z.number().finite().min(5).optional(),
+  })
+  .readonly();
+export const CameraShotsSchema = z
+  .partialRecord(CameraShotSchema, CameraShotOptionsSchema)
+  .readonly();
 const rgb = z.number().min(0).max(1);
 export const ColorSchema = z.tuple([rgb, rgb, rgb]).readonly();
 export const PaletteSchema = z
@@ -205,6 +234,7 @@ export const SceneOptionsSchema = z.object({
   scenes: worlds.optional(),
   protagonists: runners.optional(),
   camera: CameraModeSchema.optional(),
+  cameraShots: CameraShotsSchema.optional(),
   autoBiomes: z.boolean().optional(),
   worldSwitchIntervalSeconds: z.number().finite().positive().optional(),
   roadEffect: RoadEffectSchema.optional(),

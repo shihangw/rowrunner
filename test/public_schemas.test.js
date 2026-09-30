@@ -56,6 +56,26 @@ test('public progress schemas normalize timestamps without inventing stateful de
   }
 });
 
+test('camera shot settings reject unknown angles and unsafe durations', () => {
+  assert.ok(
+    SceneOptionsSchema.safeParse({
+      cameraShots: {
+        side: {azimuthDegrees: -105, durationSeconds: 30},
+        'stationary-crossing': {elevationDegrees: 18, durationSeconds: 10},
+      },
+    }).success,
+  );
+  for (const cameraShots of [
+    {side: {durationSeconds: 4}},
+    {side: {distance: 0}},
+    {side: {elevationDegrees: 90}},
+    {side: {targetOffset: [0, Infinity, 0]}},
+    {'unknown-shot': {durationSeconds: 10}},
+  ]) {
+    assert.equal(SceneOptionsSchema.safeParse({cameraShots}).success, false);
+  }
+});
+
 test('sink retains state-dependent validation and exposes structured schema errors atomically', () => {
   const sink = new ProgressSink();
   assert.ok(ProgressSnapshotSchema.safeParse(sink.snapshot(timestamp)).success);

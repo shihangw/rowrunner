@@ -71,6 +71,10 @@ const options: SceneOptions = {
   worlds: [world],
   runners: [runner],
   visualRateMultiplier: 12.5,
+  cameraShots: {
+    side: {azimuthDegrees: -105, elevationDegrees: 12, durationSeconds: 30},
+    'stationary-crossing': {durationSeconds: 10},
+  },
   onEvent(event: SceneEvent) {
     if (event.type === 'world-changed') {
       event.worldId.toUpperCase();
