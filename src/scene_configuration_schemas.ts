@@ -141,6 +141,7 @@ export const WorldPathSchema = z
     introHorizontalFov: z.number().gt(0).lt(180).optional(),
     minRange: z.number().nonnegative().optional(),
     fogDistance: z.number().nonnegative().optional(),
+    farClipDistance: z.number().positive().optional(),
   })
   .readonly();
 const definition = {

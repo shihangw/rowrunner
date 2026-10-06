@@ -120,6 +120,8 @@ export interface CameraPose {
 export interface PathFrame {
   localPoint(point: Vec3): Vec3;
   worldPoint(point: Vec3): Vec3;
+  /** Map absolute world positions into the floating render frame. */
+  localWorldPoint?(point: Vec3): Vec3;
 }
 export type WorldPath = z.infer<typeof WorldPathSchema>;
 export interface SceneFrame {
@@ -143,6 +145,8 @@ export interface SceneFrame {
   readonly roadLight: (z: number) => Color;
   /** Convert local road coordinates into the current world frame (including orbital worlds). */
   readonly projectPoint: (point: Vec3) => Vec3;
+  /** Available for paths that support absolute world-space scenery. */
+  readonly projectWorldPoint?: (point: Vec3) => Vec3;
   readonly view: Readonly<{eye: Vec3; target: Vec3; clearance: number}> | null;
 }
 export type DrawFunction = (

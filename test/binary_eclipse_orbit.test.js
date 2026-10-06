@@ -4,6 +4,7 @@ import {
   binaryCenters,
   BINARY_CENTER,
   BLACK_HOLE_RADII,
+  BINARY_ORBIT_PERIOD_SECONDS,
   orbitPoint,
   orbitCamera,
   createBinaryOrbit,
@@ -13,6 +14,7 @@ import {
   ORBIT_TRAVEL_SCALE,
 } from '../examples/src/worlds/binary-eclipse/binary_eclipse_orbit.js';
 import {PALETTES} from './fixtures/example_content_fixtures.js';
+import {worldSky} from '../examples/src/worlds/shared/sky_shader_utilities.js';
 const separation = (a, b) => Math.hypot(...a.map((v, i) => v - b[i]));
 
 test('binary and road share one center and a closed orbit at astronomical scale', () => {
@@ -23,7 +25,6 @@ test('binary and road share one center and a closed orbit at astronomical scale'
     a.map((v, i) => (v + b[i]) / 2),
     BINARY_CENTER,
   );
-  assert.deepEqual(binaryCenters(0), binaryCenters(10000));
   for (const [i, center] of binaryCenters().entries()) {
     assert.ok(
       Math.hypot(center[0] - BINARY_CENTER[0], center[2] - BINARY_CENTER[2]) +
@@ -40,6 +41,58 @@ test('binary and road share one center and a closed orbit at astronomical scale'
         1e-7,
     );
   }
+});
+
+test('black holes orbit slowly on opposite sides of a fixed shared center', () => {
+  const initialCenters = binaryCenters();
+  const initialSeparation = separation(...initialCenters);
+  for (const time of [0, 2, 15, 30, 45, 60, 10000]) {
+    const [first, second] = binaryCenters(time);
+    assert.ok(
+      separation(
+        first.map((v, i) => (v + second[i]) / 2),
+        BINARY_CENTER,
+      ) < 1e-8,
+    );
+    assert.ok(Math.abs(separation(first, second) - initialSeparation) < 1e-8);
+    assert.ok(
+      Math.abs(separation(first, BINARY_CENTER) - initialSeparation / 2) < 1e-8,
+    );
+  }
+  const afterTwoSeconds = binaryCenters(2);
+  const firstInitialOffset = initialCenters[0].map(
+    (value, index) => value - BINARY_CENTER[index],
+  );
+  const firstLaterOffset = afterTwoSeconds[0].map(
+    (value, index) => value - BINARY_CENTER[index],
+  );
+  const angle = Math.atan2(firstLaterOffset[0], firstLaterOffset[2]);
+  assert.ok(
+    Math.abs(angle - Math.PI / 15) < 1e-8,
+    'Orbit should advance six degrees per second',
+  );
+  assert.ok(separation(afterTwoSeconds[0], initialCenters[0]) > 1000);
+  for (const [index, center] of binaryCenters(
+    BINARY_ORBIT_PERIOD_SECONDS / 2,
+  ).entries()) {
+    const initialOffset =
+      index === 0
+        ? firstInitialOffset
+        : firstInitialOffset.map((value) => -value);
+    assert.ok(Math.abs(center[0] - BINARY_CENTER[0] + initialOffset[0]) < 1e-8);
+    assert.ok(Math.abs(center[2] - BINARY_CENTER[2] + initialOffset[2]) < 1e-8);
+  }
+  assert.deepEqual(binaryCenters(BINARY_ORBIT_PERIOD_SECONDS), initialCenters);
+});
+
+test('binary sky follows scene time, with repeatable positions at frozen timestamps', () => {
+  const sky = worldSky(7);
+  const initial = sky.uniforms({time: 0, reduced: false});
+  const later = sky.uniforms({time: 20, reduced: false});
+  assert.notDeepEqual(later.holeA, initial.holeA);
+  assert.deepEqual([later.holeA, later.holeB], binaryCenters(20));
+  assert.deepEqual(sky.uniforms({time: 20, reduced: true}), later);
+  assert.deepEqual(sky.uniforms({time: 0, reduced: false}), initial);
 });
 
 test('road panels stay fixed on the orbit across tracking and stationary origins', () => {

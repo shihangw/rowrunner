@@ -74,7 +74,7 @@ export function worldSky(biome) {
   return Object.freeze({
     fragment,
     uniforms({time, reduced}) {
-      const [holeA, holeB] = binaryCenters();
+      const [holeA, holeB] = binaryCenters(time);
       return {
         biome,
         lightning: biome === 6 ? stormFlash(time, reduced) : 0,

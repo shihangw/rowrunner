@@ -1,11 +1,12 @@
 import {defineWorld} from '../shared/world_definition.js';
 import {createBinaryOrbit, orbitCamera} from './binary_eclipse_orbit.js';
+import {createBinaryBlackHoles} from './binary_eclipse_objects.js';
 
 export const binaryEclipse = defineWorld({
   id: 'black-holes',
   name: 'Binary Eclipse',
   description:
-    'A distant orbital road around two enormous stationary black holes, with amber and icy-blue halos and curved arcs of light.',
+    'A distant orbital road around two enormous black holes slowly orbiting each other, with amber and icy-blue halos and curved arcs of light.',
   caption: 'Between two infinities.',
   palette: {
     sky: [0.003, 0.004, 0.015],
@@ -23,6 +24,8 @@ export const binaryEclipse = defineWorld({
     introHorizontalFov: 70,
     minRange: 1200,
     fogDistance: 1000,
+    farClipDistance: 12000,
   }),
+  create: createBinaryBlackHoles,
   draw() {},
 });

@@ -3,17 +3,24 @@ import {drawRoad} from '@shihangw/rowrunner/geometry';
 // One astronomical coordinate system for the binary and its surrounding road.
 export const BINARY_CENTER = Object.freeze([0, 31000, 0]);
 export const ORBIT_RADIUS = 150000;
-export const BLACK_HOLE_RADII = Object.freeze([24000, 16000]);
+export const BLACK_HOLE_RADII = Object.freeze([24000, 12000]);
+export const BINARY_ORBIT_PERIOD_SECONDS = 60;
 // Compress astronomical distances uniformly for the presentation. The resulting
 // 3,125-unit local radius preserves normal road width and stripe/avatar speed.
 export const ORBIT_TRAVEL_SCALE = 48;
 export const ORBIT_LENGTH = ORBIT_RADIUS * 2 * Math.PI;
 export const LOCAL_ORBIT_LENGTH = ORBIT_LENGTH / ORBIT_TRAVEL_SCALE;
 
-export function binaryCenters() {
+/** Opposing positions orbit the shared center once every minute. */
+export function binaryCenters(timeSeconds = 0) {
+  const angle =
+    ((timeSeconds % BINARY_ORBIT_PERIOD_SECONDS) * 2 * Math.PI) /
+    BINARY_ORBIT_PERIOD_SECONDS;
+  const horizontalOffset = 40000 * Math.sin(angle);
+  const forwardOffset = 40000 * Math.cos(angle);
   return [
-    [0, 1000, 40000],
-    [0, -1000, -40000],
+    [horizontalOffset, 1000, forwardOffset],
+    [-horizontalOffset, -1000, -forwardOffset],
   ].map((offset) => offset.map((v, i) => v + BINARY_CENTER[i]));
 }
 
@@ -34,6 +41,8 @@ export function orbitPoint([x, y, z], distance) {
 export function createBinaryOrbit(distance, entryDistance = 0) {
   const origin = orbitPoint([0, 0, 0], distance - entryDistance);
   const worldPoint = (point) => orbitPoint(point, distance - entryDistance);
+  const localWorldPoint = (point) =>
+    point.map((value, index) => (value - origin[index]) / ORBIT_TRAVEL_SCALE);
   /** @type {(point: import('@shihangw/rowrunner/scene').Vec3) => import('@shihangw/rowrunner/scene').Vec3} */
   const localPoint = (point) => {
     const p = worldPoint(point);
@@ -49,6 +58,7 @@ export function createBinaryOrbit(distance, entryDistance = 0) {
     origin,
     worldPoint,
     localPoint,
+    localWorldPoint,
   };
 }
 

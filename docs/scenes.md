@@ -213,6 +213,12 @@ including Binary Eclipse's orbit. Use `frame.near`/`far` for coverage; avoid
 rebuilding geometry and materials every frame. Native worlds can use instancing,
 LOD, textures, and their own lights.
 
+For absolute scenery in curved worlds, a path can supply
+`localWorldPoint(position)` on its frame. Plugins receive this conversion as
+`frame.projectWorldPoint(position)`. The path's optional `farClipDistance`
+sets the camera's minimum far plane in render units, allowing large distant
+objects to share the scene's depth buffer with the road and runner.
+
 For GLB/glTF assets, use Three.js's standard addon loader. Load before creating
 the visualization; plugin factories stay synchronous:
 

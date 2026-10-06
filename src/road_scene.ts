@@ -1020,6 +1020,7 @@ export class RoadScene {
     const farClipDistance = Math.max(
       1300,
       (stationaryFrame?.segmentLength ?? 0) * 2,
+      world.path?.farClipDistance ?? 0,
     );
     const projectionMatrix = new Float32Array([
       projectionScale / (viewportWidth / viewportHeight),
@@ -1092,6 +1093,7 @@ export class RoadScene {
           this.roadEffect,
         ).accent,
       projectPoint: orbit?.localPoint ?? ((point: Vec3): Vec3 => [...point]),
+      projectWorldPoint: orbit?.localWorldPoint,
       view:
         stationaryFrame != null
           ? Object.freeze({
