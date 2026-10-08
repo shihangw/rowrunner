@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/shihangw/rowrunner/compare/v0.5.0...v0.6.0) (2026-10-08)
+
+### Features
+
+- Add optional `WorldPath.farClipDistance`, `PathFrame.localWorldPoint`, and `SceneFrame.projectWorldPoint` for distant scenery in curved worlds.
+- Improve the Binary Eclipse example with orbiting 3D black holes, denser plasma, closed-loop flow, color mixing, and camera-relative disk inclination ([#18](https://github.com/shihangw/rowrunner/pull/18)).
+
 ## [0.5.0](https://github.com/shihangw/rowrunner/compare/v0.4.0...v0.5.0) (2026-09-30)
 
 ### Features
